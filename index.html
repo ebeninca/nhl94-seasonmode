@@ -151,11 +151,14 @@
                 <p>1993-94 NHL Playoffs</p>
             </div>
             <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; justify-content:center;">
+                <button class="btn player-stats-filters" id="btnViewCalendar" onclick="switchPlayoffView('calendar')">Calendar</button>
+                <button class="btn player-stats-filters" id="btnViewBracket" onclick="switchPlayoffView('bracket')">Bracket</button>
                 <button class="btn" onclick="showPlayoffLeaders()">Playoff Stats</button>
                 <button class="btn" onclick="saveGame()">Save Game</button>
                 <button class="btn" onclick="exportSave()">Export Save</button>
             </div>
-            <div id="playoffBracket"></div>
+            <div id="playoffCalendar"></div>
+            <div id="playoffBracket" style="display:none;"></div>
         </div>
     </div>
 

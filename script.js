@@ -1700,6 +1700,8 @@ function saveGame() {
       teamStats,
       allGames,
       playoffState,
+      playoffView,
+      playoffCurrentDate: playoffCurrentDate ? playoffCurrentDate.toISOString() : null,
       savedAt: new Date().toISOString()
     };
     const json = JSON.stringify(gameState);
@@ -1776,6 +1778,8 @@ function continueGame() {
     currentDate  = new Date(gameState.currentDate);
     teamStats    = gameState.teamStats;
     playoffState = gameState.playoffState || null;
+    playoffView  = gameState.playoffView || 'calendar';
+    playoffCurrentDate = gameState.playoffCurrentDate ? new Date(gameState.playoffCurrentDate) : null;
 
     // Recalculate avgRating for all teams (fix for NaN bug)
     Object.keys(teams).forEach(teamName => {
@@ -2016,7 +2020,9 @@ function simulateRealisticGame(game) {
 }
 // ─── PLAYOFFS ────────────────────────────────────────────────────────────────
 
-let playoffState = null; // { rounds: [...], currentRoundIndex, currentSeriesIndex }
+let playoffState = null;
+let playoffView = 'calendar'; // 'bracket' or 'calendar'
+let playoffCurrentDate = null;
 
 function getPlayoffSeeds() {
     // Top 8 from each conference, sorted by points then wins
@@ -2060,7 +2066,6 @@ function initPlayoffs() {
     const seeds = getPlayoffSeeds();
     const firstRoundMatchups = buildFirstRound(seeds);
 
-    // Initialize playoff player stats
     Object.keys(teams).forEach(team => {
         if (!teamStats[team].playoffStats) {
             teamStats[team].playoffStats = {};
@@ -2075,25 +2080,329 @@ function initPlayoffs() {
     playoffState = {
         seeds,
         rounds: [round1Series],
-        currentRoundIndex: 0,
-        currentSeriesIndex: 0,
-        champion: null
+        champion: null,
+        calendar: [] // playoff game days
     };
 
+    generatePlayoffCalendar();
+    playoffCurrentDate = playoffState.calendar[0]?.date || new Date('1994-04-18');
+    playoffView = 'calendar';
     showPlayoffScreen();
 }
 
 function showPlayoffScreen() {
     hideAllScreens();
     document.getElementById('playoffScreen').classList.add('active');
-    renderPlayoffBracket();
+    renderPlayoffView();
 }
 
+function renderPlayoffView() {
+    if (playoffView === 'bracket') {
+        document.getElementById('playoffBracket').style.display = 'block';
+        document.getElementById('playoffCalendar').style.display = 'none';
+        document.getElementById('btnViewBracket').classList.add('active');
+        document.getElementById('btnViewCalendar').classList.remove('active');
+        renderPlayoffBracket();
+    } else {
+        document.getElementById('playoffBracket').style.display = 'none';
+        document.getElementById('playoffCalendar').style.display = 'block';
+        document.getElementById('btnViewCalendar').classList.add('active');
+        document.getElementById('btnViewBracket').classList.remove('active');
+        renderPlayoffCalendarView();
+    }
+}
+
+function switchPlayoffView(view) {
+    playoffView = view;
+    renderPlayoffView();
+}
+
+// ─── PLAYOFF CALENDAR ────────────────────────────────────────────────────────
+
+function generatePlayoffCalendar() {
+    const roundStartDates = [
+        new Date('1994-04-18'),
+        new Date('1994-05-02'),
+        new Date('1994-05-16'),
+        new Date('1994-05-26')
+    ];
+
+    playoffState.calendar = [];
+    addRoundToCalendar(0, roundStartDates[0]);
+}
+
+function addRoundToCalendar(roundIdx, startDate) {
+    const round = playoffState.rounds[roundIdx];
+    if (!round) return;
+    for (let gameNum = 0; gameNum < 7; gameNum++) {
+        const gameDate = new Date(startDate);
+        gameDate.setDate(startDate.getDate() + gameNum * 2);
+        round.forEach(series => {
+            playoffState.calendar.push({
+                date: gameDate,
+                series,
+                gameNum,
+                played: false
+            });
+        });
+    }
+    playoffState.calendar.sort((a, b) => a.date - b.date);
+}
+
+function rebuildCalendarForNewRound() {
+    const roundStartDates = [
+        new Date('1994-04-18'),
+        new Date('1994-05-02'),
+        new Date('1994-05-16'),
+        new Date('1994-05-26')
+    ];
+    const newRoundIdx = playoffState.rounds.length - 1;
+    addRoundToCalendar(newRoundIdx, roundStartDates[newRoundIdx]);
+    // Jump to first unplayed game of the new round
+    const next = playoffState.calendar.find(e =>
+        !e.played && !e.series.winner &&
+        playoffState.rounds[newRoundIdx].includes(e.series)
+    );
+    if (next) playoffCurrentDate = next.date;
+}
+
+function getCalendarDates() {
+    const dates = [];
+    const seen = new Set();
+    // Only include dates that have at least one relevant entry:
+    // either a game that was played, or a game that is next to be played in its series
+    playoffState.calendar.forEach(e => {
+        const relevant = e.played || (!e.series.winner && e.gameNum === e.series.games.length);
+        if (!relevant) return;
+        const key = e.date.toDateString();
+        if (!seen.has(key)) { seen.add(key); dates.push(e.date); }
+    });
+    return dates.sort((a, b) => a - b);
+}
+
+function renderPlayoffCalendarView() {
+    const container = document.getElementById('playoffCalendar');
+    if (!container || !playoffState) return;
+
+    const dateStr = playoffCurrentDate.toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    const todayEntries = playoffState.calendar.filter(
+        e => e.date.toDateString() === playoffCurrentDate.toDateString()
+    );
+
+    // Entries to show: played ones + next unplayed game per active series
+    const shownEntries = todayEntries.filter(e => {
+        if (e.played) return true;
+        if (e.series.winner) return false;
+        return e.gameNum === e.series.games.length;
+    });
+
+    const allDates = getCalendarDates();
+    const currentIdx = allDates.findIndex(d => d.toDateString() === playoffCurrentDate.toDateString());
+    const hasPrev = currentIdx > 0;
+    const hasNext = currentIdx < allDates.length - 1;
+
+    // Check if user has unplayed game today
+    const userEntryToday = shownEntries.find(
+        e => e.series.team1 === selectedTeam || e.series.team2 === selectedTeam
+    );
+    const allTodayDone = shownEntries.every(e => e.played);
+
+    let html = `<div class="current-date">${dateStr}</div>`;
+    html += `<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">`;
+    html += `<button class="btn" onclick="playoffPrevDate()" ${!hasPrev ? 'disabled' : ''}>← Previous Date</button>`;
+    html += `<button class="btn" onclick="playoffNextDate()" ${userEntryToday && !userEntryToday.played ? 'disabled' : ''}>Next Date →</button>`;
+    html += `</div>`;
+
+    if (playoffState.champion) {
+        html += `<div style="text-align:center; padding:20px; background:rgba(255,215,0,0.2); border:2px solid #FFD700; border-radius:10px; margin-bottom:20px;">
+            <h2 style="color:#FFD700;">🏆 Stanley Cup Champion: ${playoffState.champion} 🏆</h2></div>`;
+    }
+
+    if (shownEntries.length === 0 && !playoffState.champion) {
+        html += `<p style="text-align:center; color:#ccc;">No games scheduled today.</p>`;
+    }
+
+    const roundNames = ['First Round', 'Conference Semifinals', 'Conference Finals', 'Stanley Cup Final'];
+
+    shownEntries.forEach((entry, idx) => {
+        const s = entry.series;
+        const isUser = s.team1 === selectedTeam || s.team2 === selectedTeam;
+        const roundName = roundNames[playoffState.rounds.indexOf(
+            playoffState.rounds.find(r => r.includes(s))
+        )] || '';
+        const gameNum = s.games.length + 1;
+        const divClass = isUser ? 'game-item user-playoff-game' : 'game-item';
+
+        html += `<div class="${divClass}">`;
+        html += `<div><strong>${roundName}</strong> — Game ${gameNum} | Series: ${s.wins1}-${s.wins2}</div>`;
+        html += `<div><strong>${s.team1}</strong> vs <strong>${s.team2}</strong></div>`;
+
+        if (entry.played) {
+            const gameIndex = entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1;
+            const last = s.games[gameIndex];
+            if (last) {
+                html += `<div>Final: ${last.score1} - ${last.score2}</div>`;
+            }
+            if (s.winner) html += `<div style="color:#4CAF50;">Series winner: ${s.winner}</div>`;
+        } else if (isUser) {
+            html += `<div style="margin-top:8px;">
+                <input type="number" class="score-input" id="pcal-s1-${idx}" min="0" max="20" placeholder="0">
+                -
+                <input type="number" class="score-input" id="pcal-s2-${idx}" min="0" max="20" placeholder="0">
+                <button class="btn" onclick="submitPlayoffCalendarGame(${idx}, '${s.team1}', '${s.team2}')">Submit</button>
+                <button class="btn" onclick="simulatePlayoffCalendarGame(${idx}, '${s.team1}', '${s.team2}')">Simulate</button>
+            </div>`;
+        } else {
+            html += `<div><em>Will be simulated</em></div>`;
+        }
+        html += `</div>`;
+    });
+
+    container.innerHTML = html;
+}
+
+function getVisibleEntriesForDate(date) {
+    return playoffState.calendar.filter(e =>
+        e.date.toDateString() === date.toDateString() &&
+        !e.series.winner &&
+        e.gameNum === e.series.games.length
+    );
+}
+
+function submitPlayoffCalendarGame(idx, team1, team2) {
+    // Find entry by team names to avoid index mismatch between shownEntries and getVisibleEntriesForDate
+    const entries = getVisibleEntriesForDate(playoffCurrentDate);
+    const entry = team1
+        ? entries.find(e => e.series.team1 === team1 && e.series.team2 === team2)
+        : entries[idx];
+    if (!entry) return;
+    const s1 = parseInt(document.getElementById(`pcal-s1-${idx}`)?.value) || 0;
+    const s2 = parseInt(document.getElementById(`pcal-s2-${idx}`)?.value) || 0;
+    if (s1 === s2) { showModal('Playoff games cannot end in a tie!'); return; }
+
+    const isTeam1 = entry.series.team1 === selectedTeam;
+    const userScore = isTeam1 ? s1 : s2;
+    const oppScore = isTeam1 ? s2 : s1;
+    const oppTeam = isTeam1 ? entry.series.team2 : entry.series.team1;
+
+    showPlayoffPlayerStatsModal(entry.series, s1, s2, selectedTeam, oppTeam, entry.series.team1, entry.series.team2, () => {
+        entry.played = true;
+        simulateRemainingCalendarGamesToday();
+        const newRound = checkAndAdvancePlayoffRound();
+        if (!newRound) {
+            // stay on current date, just re-render
+        }
+        renderPlayoffView();
+    });
+}
+
+function simulatePlayoffCalendarGame(idx, team1, team2) {
+    const entries = getVisibleEntriesForDate(playoffCurrentDate);
+    const entry = team1
+        ? entries.find(e => e.series.team1 === team1 && e.series.team2 === team2)
+        : entries[idx];
+    if (!entry) return;
+    const { score1, score2 } = simulatePlayoffGame(entry.series);
+    advancePlayoffSeries(entry.series, score1, score2);
+    entry.played = true;
+    simulateRemainingCalendarGamesToday();
+    const newRound = checkAndAdvancePlayoffRound();
+    if (!newRound) {
+        // stay on current date
+    }
+    renderPlayoffView();
+}
+
+function simulateRemainingCalendarGamesToday() {
+    const entries = getVisibleEntriesForDate(playoffCurrentDate);
+    entries.forEach(e => {
+        if (!e.played && !e.series.winner &&
+            e.series.team1 !== selectedTeam && e.series.team2 !== selectedTeam) {
+            const { score1, score2 } = simulatePlayoffGame(e.series);
+            advancePlayoffSeries(e.series, score1, score2);
+            e.played = true;
+        }
+    });
+}
+
+function checkAndAdvancePlayoffRound() {
+    const currentRound = playoffState.rounds[playoffState.rounds.length - 1];
+    if (!currentRound.every(s => s.winner)) return false;
+
+    const winners = currentRound.map(s => s.winner);
+    const roundIdx = playoffState.rounds.length - 1;
+
+    if (roundIdx === 3) {
+        playoffState.champion = winners[0];
+        return false;
+    }
+
+    let nextSeries = [];
+    if (roundIdx < 2) {
+        const eastWinners = winners.filter((_, i) => currentRound[i].conf === 'Eastern');
+        const westWinners = winners.filter((_, i) => currentRound[i].conf === 'Western');
+        for (let i = 0; i < eastWinners.length; i += 2)
+            nextSeries.push(createSeries(eastWinners[i], eastWinners[i+1], 'Eastern'));
+        for (let i = 0; i < westWinners.length; i += 2)
+            nextSeries.push(createSeries(westWinners[i], westWinners[i+1], 'Western'));
+    } else {
+        const eastChamp = winners.find((_, i) => currentRound[i].conf === 'Eastern');
+        const westChamp = winners.find((_, i) => currentRound[i].conf === 'Western');
+        nextSeries.push(createSeries(eastChamp, westChamp, 'Final'));
+    }
+
+    nextSeries.forEach(s => {
+        [s.team1, s.team2].forEach(team => {
+            if (!teamStats[team].playoffStats) {
+                teamStats[team].playoffStats = {};
+                Object.values(players[team]).flat().forEach(p => {
+                    teamStats[team].playoffStats[p.name] = { goals: 0, assists: 0, points: 0, pim: 0, gp: 0 };
+                });
+            }
+        });
+    });
+
+    playoffState.rounds.push(nextSeries);
+    rebuildCalendarForNewRound();
+    return true; // new round was created, date already updated
+}
+
+function playoffPrevDate() {
+    const allDates = getCalendarDates();
+    const idx = allDates.findIndex(d => d.toDateString() === playoffCurrentDate.toDateString());
+    if (idx > 0) { playoffCurrentDate = allDates[idx - 1]; renderPlayoffView(); }
+}
+
+function playoffNextDate() {
+    const userEntry = getVisibleEntriesForDate(playoffCurrentDate).find(
+        e => (e.series.team1 === selectedTeam || e.series.team2 === selectedTeam) && !e.played
+    );
+    if (userEntry) { showModal('Please submit or simulate your game before advancing.'); return; }
+
+    simulateRemainingCalendarGamesToday();
+    const newRound = checkAndAdvancePlayoffRound();
+    if (newRound) { renderPlayoffView(); return; } // date already set by rebuildCalendarForNewRound
+
+    const allDates = getCalendarDates();
+    const idx = allDates.findIndex(d => d.toDateString() === playoffCurrentDate.toDateString());
+    if (idx < allDates.length - 1) {
+        playoffCurrentDate = allDates[idx + 1];
+    }
+    renderPlayoffView();
+}
+
+// ─── END PLAYOFF CALENDAR ─────────────────────────────────────────────────────
+
 function getCurrentSeries() {
+    // Used only for modal callbacks; find first unfinished series
     if (!playoffState) return null;
-    const round = playoffState.rounds[playoffState.currentRoundIndex];
-    if (!round) return null;
-    return round[playoffState.currentSeriesIndex] || null;
+    for (const round of playoffState.rounds) {
+        for (const s of round) { if (!s.winner) return s; }
+    }
+    return null;
 }
 
 function simulatePlayoffGame(series) {
@@ -2149,130 +2458,22 @@ function updatePlayoffPlayerStats(teamName, playerStats) {
 }
 
 function simulateAllSeriesInRound() {
-    const round = playoffState.rounds[playoffState.currentRoundIndex];
+    const round = playoffState.rounds[playoffState.rounds.length - 1];
     round.forEach(series => {
-        if (!series.winner) {
-            while (!series.winner) {
-                const { score1, score2 } = simulatePlayoffGame(series);
-                advancePlayoffSeries(series, score1, score2);
-            }
+        while (!series.winner) {
+            const { score1, score2 } = simulatePlayoffGame(series);
+            advancePlayoffSeries(series, score1, score2);
         }
     });
-    advanceToNextRound();
+    checkAndAdvancePlayoffRound();
+    renderPlayoffView();
 }
 
-function advanceToNextRound() {
-    const round = playoffState.rounds[playoffState.currentRoundIndex];
-    const allDone = round.every(s => s.winner);
-    if (!allDone) return;
-
-    const winners = round.map(s => s.winner);
-    const roundIdx = playoffState.currentRoundIndex;
-
-    if (roundIdx === 3) {
-        // Stanley Cup champion
-        playoffState.champion = winners[0];
-        renderPlayoffBracket();
-        return;
-    }
-
-    let nextSeries = [];
-    if (roundIdx < 2) {
-        // Conference rounds: pair winners within same conference
-        // Eastern: indices 0,1,2,3 → winners 0,1,2,3
-        // Western: indices 4,5,6,7 → winners 4,5,6,7
-        const eastWinners = winners.filter((_, i) => round[i].conf === 'Eastern');
-        const westWinners = winners.filter((_, i) => round[i].conf === 'Western');
-        for (let i = 0; i < eastWinners.length; i += 2) {
-            nextSeries.push(createSeries(eastWinners[i], eastWinners[i+1], 'Eastern'));
-        }
-        for (let i = 0; i < westWinners.length; i += 2) {
-            nextSeries.push(createSeries(westWinners[i], westWinners[i+1], 'Western'));
-        }
-    } else if (roundIdx === 2) {
-        // Conference finals → Stanley Cup Final
-        const eastChamp = winners.find((_, i) => round[i].conf === 'Eastern');
-        const westChamp = winners.find((_, i) => round[i].conf === 'Western');
-        nextSeries.push(createSeries(eastChamp, westChamp, 'Final'));
-    }
-
-    playoffState.rounds.push(nextSeries);
-    playoffState.currentRoundIndex++;
-    playoffState.currentSeriesIndex = 0;
-    renderPlayoffBracket();
-}
-
-function playNextPlayoffGame() {
-    const series = getCurrentSeries();
-    if (!series) return;
-
-    if (series.winner) {
-        // Move to next series or next round
-        const round = playoffState.rounds[playoffState.currentRoundIndex];
-        if (playoffState.currentSeriesIndex < round.length - 1) {
-            playoffState.currentSeriesIndex++;
-        } else {
-            advanceToNextRound();
-        }
-        renderPlayoffBracket();
-        return;
-    }
-
-    const isUserSeries = series.team1 === selectedTeam || series.team2 === selectedTeam;
-    if (isUserSeries) {
-        showPlayoffGameInput(series);
-    } else {
-        const { score1, score2 } = simulatePlayoffGame(series);
-        advancePlayoffSeries(series, score1, score2);
-        renderPlayoffBracket();
-    }
-}
-
-function showPlayoffGameInput(series) {
-    const isTeam1 = series.team1 === selectedTeam;
-    const userTeam = isTeam1 ? series.team1 : series.team2;
-    const oppTeam = isTeam1 ? series.team2 : series.team1;
-    const gameNum = series.games.length + 1;
-
-    const modalContent = document.getElementById('modalContent');
-    modalContent.innerHTML = `
-        <h3>Playoff Game ${gameNum}</h3>
-        <p>${series.team1} vs ${series.team2}</p>
-        <p>Series: ${series.wins1}-${series.wins2}</p>
-        <div style="margin: 20px 0;">
-            <label>${series.team1}: <input type="number" id="pg-score1" min="0" max="20" value="0" style="width:50px; background:#222; color:white; border:1px solid #4CAF50; padding:5px; border-radius:4px;"></label>
-            <span style="margin: 0 10px;">-</span>
-            <label>${series.team2}: <input type="number" id="pg-score2" min="0" max="20" value="0" style="width:50px; background:#222; color:white; border:1px solid #4CAF50; padding:5px; border-radius:4px;"></label>
-        </div>
-        <div class="modal-buttons">
-            <button class="btn" onclick="submitPlayoffGame('${series.team1}', '${series.team2}')">Submit</button>
-            <button class="btn" onclick="simulatePlayoffGameModal('${series.team1}', '${series.team2}')">Simulate</button>
-        </div>
-    `;
-    document.getElementById('modal').classList.add('show');
-}
-
-function submitPlayoffGame(team1, team2) {
-    const s1 = parseInt(document.getElementById('pg-score1').value) || 0;
-    const s2 = parseInt(document.getElementById('pg-score2').value) || 0;
-    if (s1 === s2) { showModal('Playoff games cannot end in a tie!'); return; }
-
-    const series = getCurrentSeries();
-    if (!series) return;
-
-    // Show player stats modal for user's game
-    closeModal();
-    const isTeam1 = series.team1 === selectedTeam;
-    const userScore = isTeam1 ? s1 : s2;
-    const oppScore = isTeam1 ? s2 : s1;
-    const oppTeam = isTeam1 ? series.team2 : series.team1;
-
-    showPlayoffPlayerStatsModal(series, s1, s2, selectedTeam, oppTeam, series.team1, series.team2);
-}
-
-function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName, oppTeamName, t1, t2) {
+function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName, oppTeamName, t1, t2, callback) {
     const userScore = userTeamName === t1 ? score1 : score2;
     const oppScore = userTeamName === t1 ? score2 : score1;
+    window._playoffStatsCallback = callback || null;
+    window._playoffCurrentSeries = series;
 
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
@@ -2364,14 +2565,20 @@ function submitPlayoffPlayerStats(score1, score2, userTeamName, oppTeamName, t1,
         if (oppStats[p.name]) oppStats[p.name].pim = pim;
     });
 
-    const series = getCurrentSeries();
+    const series = window._playoffCurrentSeries || getCurrentSeries();
+    window._playoffCurrentSeries = null;
     advancePlayoffSeries(series, score1, score2);
     // Override with user-entered stats
     updatePlayoffPlayerStats(userTeamName, userStats);
     updatePlayoffPlayerStats(oppTeamName, oppStats);
 
     closeModal();
-    renderPlayoffBracket();
+    if (window._playoffStatsCallback) {
+        window._playoffStatsCallback();
+        window._playoffStatsCallback = null;
+    } else {
+        renderPlayoffView();
+    }
 }
 
 function simulatePlayoffGameModal(team1, team2) {
@@ -2380,7 +2587,7 @@ function simulatePlayoffGameModal(team1, team2) {
     if (!series) return;
     const { score1, score2 } = simulatePlayoffGame(series);
     advancePlayoffSeries(series, score1, score2);
-    renderPlayoffBracket();
+    renderPlayoffView();
 }
 
 function renderPlayoffBracket() {
@@ -2388,80 +2595,74 @@ function renderPlayoffBracket() {
     const container = document.getElementById('playoffBracket');
     if (!container) return;
 
-    const roundNames = ['First Round', 'Conference Semifinals', 'Conference Finals', 'Stanley Cup Final'];
-    const currentSeries = getCurrentSeries();
+    // Build a full 4-round structure with TBD placeholders
+    // rounds[0]=R1(8 series), rounds[1]=Semis(4), rounds[2]=ConfFinals(2), rounds[3]=SCFinal(1)
+    const allRounds = [[], [], [], []];
+    playoffState.rounds.forEach((round, ri) => {
+        allRounds[ri] = round;
+    });
+    // Fill missing rounds with TBD placeholders
+    const eastR1 = allRounds[0].filter(s => s.conf === 'Eastern');
+    const westR1 = allRounds[0].filter(s => s.conf === 'Western');
+
+    // For each conference, build 3 rounds (R1=4, Semis=2, Finals=1) + center Final
+    function getSeriesForSlot(conf, roundIdx, slotIdx) {
+        const round = allRounds[roundIdx];
+        if (!round || round.length === 0) return null;
+        const confSeries = round.filter(s => s.conf === conf || (roundIdx === 3 && s.conf === 'Final'));
+        return confSeries[slotIdx] || null;
+    }
+
+    const roundNames = ['First Round', 'Conf. Semifinals', 'Conf. Finals'];
+
+    function renderConfColumn(conf) {
+        let html = `<div class="conference"><h3>${conf} Conference</h3>`;
+        for (let ri = 0; ri < 3; ri++) {
+            const round = allRounds[ri];
+            const confSeries = round ? round.filter(s => s.conf === conf) : [];
+            const slotsNeeded = [4, 2, 1][ri];
+            html += `<div class="bracket-round"><h4>${roundNames[ri]}</h4>`;
+            for (let si = 0; si < slotsNeeded; si++) {
+                const s = confSeries[si] || null;
+                html += s ? renderSeriesCard(s) : renderTBDCard();
+            }
+            html += `</div>`;
+        }
+        html += `</div>`;
+        return html;
+    }
 
     let html = '';
 
     if (playoffState.champion) {
-        html += `<div style="text-align:center; padding:30px; background:rgba(255,215,0,0.2); border:2px solid #FFD700; border-radius:10px; margin-bottom:30px;">
-            <h2 style="color:#FFD700;">🏆 Stanley Cup Champion 🏆</h2>
-            <h1 style="color:#FFD700; font-size:2em;">${playoffState.champion}</h1>
-        </div>`;
+        html += `<div style="text-align:center; padding:20px; background:rgba(255,215,0,0.2); border:2px solid #FFD700; border-radius:10px; margin-bottom:20px;">
+            <h2 style="color:#FFD700;">🏆 Stanley Cup Champion: ${playoffState.champion} 🏆</h2></div>`;
     }
 
-    // Bracket layout: East left, Final center, West right
     html += `<div class="bracket-container">`;
-
-    // Eastern Conference column
-    html += `<div class="conference"><h3>Eastern Conference</h3>`;
-    playoffState.rounds.forEach((round, ri) => {
-        if (ri === 3) return; // Final shown in center
-        const eastSeries = round.filter(s => s.conf === 'Eastern');
-        if (eastSeries.length === 0) return;
-        html += `<div class="bracket-round"><h4>${roundNames[ri]}</h4>`;
-        eastSeries.forEach(s => { html += renderSeriesCard(s, currentSeries); });
-        html += `</div>`;
-    });
-    html += `</div>`;
+    html += renderConfColumn('Eastern');
 
     // Center: Stanley Cup Final
     html += `<div class="stanley-cup-final"><h3>🏆 Stanley Cup Final</h3>`;
-    if (playoffState.rounds.length > 3) {
-        const finalSeries = playoffState.rounds[3][0];
-        html += renderSeriesCard(finalSeries, currentSeries);
-    } else {
-        html += `<p style="color:#ccc;">TBD</p>`;
-    }
+    const finalSeries = allRounds[3] && allRounds[3][0];
+    html += finalSeries ? renderSeriesCard(finalSeries) : renderTBDCard();
     html += `</div>`;
 
-    // Western Conference column
-    html += `<div class="conference"><h3>Western Conference</h3>`;
-    playoffState.rounds.forEach((round, ri) => {
-        if (ri === 3) return;
-        const westSeries = round.filter(s => s.conf === 'Western');
-        if (westSeries.length === 0) return;
-        html += `<div class="bracket-round"><h4>${roundNames[ri]}</h4>`;
-        westSeries.forEach(s => { html += renderSeriesCard(s, currentSeries); });
-        html += `</div>`;
-    });
+    html += renderConfColumn('Western');
     html += `</div>`;
-
-    html += `</div>`; // end bracket-container
-
-    // Action buttons
-    if (!playoffState.champion) {
-        const series = getCurrentSeries();
-        if (series && !series.winner) {
-            const isUserSeries = series.team1 === selectedTeam || series.team2 === selectedTeam;
-            html += `<div style="text-align:center; margin-top:20px;">`;
-            if (isUserSeries) {
-                html += `<button class="btn" onclick="playNextPlayoffGame()">Play Next Game (${series.team1} vs ${series.team2})</button>`;
-            } else {
-                html += `<button class="btn" onclick="playNextPlayoffGame()">Simulate Next Game (${series.team1} vs ${series.team2})</button>`;
-                html += ` <button class="btn" onclick="simulateAllSeriesInRound()">Simulate Entire Round</button>`;
-            }
-            html += `</div>`;
-        } else if (series && series.winner) {
-            html += `<div style="text-align:center; margin-top:20px;"><button class="btn" onclick="playNextPlayoffGame()">Next Series →</button></div>`;
-        }
-    }
 
     container.innerHTML = html;
 }
 
-function renderSeriesCard(series, currentSeries) {
-    const isActive = currentSeries && series.team1 === currentSeries.team1 && series.team2 === currentSeries.team2;
+function renderTBDCard() {
+    return `<div class="matchup">
+        <div class="team" style="color:#666;">TBD</div>
+        <div class="series-score" style="color:#555;">- vs -</div>
+        <div class="team" style="color:#666;">TBD</div>
+    </div>`;
+}
+
+function renderSeriesCard(series) {
     const isUserSeries = series.team1 === selectedTeam || series.team2 === selectedTeam;
     let cls = 'matchup';
     if (isUserSeries) cls += ' user-team';
@@ -2469,7 +2670,7 @@ function renderSeriesCard(series, currentSeries) {
     const t1cls = series.winner === series.team1 ? 'team winner' : (series.winner ? 'team eliminated' : 'team');
     const t2cls = series.winner === series.team2 ? 'team winner' : (series.winner ? 'team eliminated' : 'team');
 
-    return `<div class="${cls}" style="${isActive ? 'border-color:#FFD700;' : ''}">
+    return `<div class="${cls}">
         <div class="${t1cls}">${series.team1}</div>
         <div class="series-score">${series.wins1} - ${series.wins2}</div>
         <div class="${t2cls}">${series.team2}</div>
