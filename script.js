@@ -2233,20 +2233,27 @@ function renderPlayoffCalendarView() {
         const roundName = roundNames[playoffState.rounds.indexOf(
             playoffState.rounds.find(r => r.includes(s))
         )] || '';
-        const gameNum = s.games.length + 1;
         const divClass = isUser ? 'game-item user-playoff-game' : 'game-item';
 
+        const homeGames = [0, 1, 4, 6];
+        const team1IsHome = homeGames.includes(entry.gameNum);
+        const visitor = team1IsHome ? s.team2 : s.team1;
+        const home    = team1IsHome ? s.team1 : s.team2;
+
+        // Use snapshot for past games, live state for current/future
+        const displayGameNum = entry.snapshot ? entry.snapshot.gameNum + 1 : s.games.length + 1;
+        const displayWins1   = entry.snapshot ? entry.snapshot.wins1   : s.wins1;
+        const displayWins2   = entry.snapshot ? entry.snapshot.wins2   : s.wins2;
+
         html += `<div class="${divClass}">`;
-        html += `<div><strong>${roundName}</strong> — Game ${gameNum} | Series: ${s.wins1}-${s.wins2}</div>`;
-        html += `<div><strong>${s.team1}</strong> vs <strong>${s.team2}</strong></div>`;
+        html += `<div><strong>${roundName}</strong> — Game ${displayGameNum} | Series: ${displayWins1}-${displayWins2}</div>`;
+        html += `<div><strong>${visitor}</strong> @ <strong>${home}</strong></div>`;
 
         if (entry.played) {
             const gameIndex = entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1;
             const last = s.games[gameIndex];
-            if (last) {
-                html += `<div>Final: ${last.score1} - ${last.score2}</div>`;
-            }
-            if (s.winner) html += `<div style="color:#4CAF50;">Series winner: ${s.winner}</div>`;
+            if (last) html += `<div>Final: ${last.score1} - ${last.score2}</div>`;
+            if (s.winner && entry.gameNum === s.games.length - 1) html += `<div style="color:#4CAF50;">Series winner: ${s.winner}</div>`;
         } else if (isUser) {
             html += `<div style="margin-top:8px;">
                 <input type="number" class="score-input" id="pcal-s1-${idx}" min="0" max="20" placeholder="0">
@@ -2273,28 +2280,32 @@ function getVisibleEntriesForDate(date) {
 }
 
 function submitPlayoffCalendarGame(idx, team1, team2) {
-    // Find entry by team names to avoid index mismatch between shownEntries and getVisibleEntriesForDate
     const entries = getVisibleEntriesForDate(playoffCurrentDate);
     const entry = team1
         ? entries.find(e => e.series.team1 === team1 && e.series.team2 === team2)
         : entries[idx];
     if (!entry) return;
-    const s1 = parseInt(document.getElementById(`pcal-s1-${idx}`)?.value) || 0;
-    const s2 = parseInt(document.getElementById(`pcal-s2-${idx}`)?.value) || 0;
-    if (s1 === s2) { showModal('Playoff games cannot end in a tie!'); return; }
 
-    const isTeam1 = entry.series.team1 === selectedTeam;
-    const userScore = isTeam1 ? s1 : s2;
-    const oppScore = isTeam1 ? s2 : s1;
-    const oppTeam = isTeam1 ? entry.series.team2 : entry.series.team1;
+    // s1/s2 are visitor/home scores as shown in the UI
+    const sVisitor = parseInt(document.getElementById(`pcal-s1-${idx}`)?.value) || 0;
+    const sHome    = parseInt(document.getElementById(`pcal-s2-${idx}`)?.value) || 0;
+    if (sVisitor === sHome) { showModal('Playoff games cannot end in a tie!'); return; }
 
-    showPlayoffPlayerStatsModal(entry.series, s1, s2, selectedTeam, oppTeam, entry.series.team1, entry.series.team2, () => {
+    const homeGames = [0, 1, 4, 6];
+    const team1IsHome = homeGames.includes(entry.gameNum);
+    // Convert to team1/team2 scores for advancePlayoffSeries
+    const scoreTeam1 = team1IsHome ? sHome : sVisitor;
+    const scoreTeam2 = team1IsHome ? sVisitor : sHome;
+
+    const isUserTeam1 = entry.series.team1 === selectedTeam;
+    const oppTeam = isUserTeam1 ? entry.series.team2 : entry.series.team1;
+
+    showPlayoffPlayerStatsModal(entry.series, scoreTeam1, scoreTeam2, selectedTeam, oppTeam, entry.series.team1, entry.series.team2, () => {
+        entry.snapshot = { gameNum: entry.gameNum, wins1: entry.series.wins1, wins2: entry.series.wins2 };
         entry.played = true;
         simulateRemainingCalendarGamesToday();
         const newRound = checkAndAdvancePlayoffRound();
-        if (!newRound) {
-            // stay on current date, just re-render
-        }
+        if (!newRound) {}
         renderPlayoffView();
     });
 }
@@ -2306,6 +2317,7 @@ function simulatePlayoffCalendarGame(idx, team1, team2) {
         : entries[idx];
     if (!entry) return;
     const { score1, score2 } = simulatePlayoffGame(entry.series);
+    entry.snapshot = { gameNum: entry.gameNum, wins1: entry.series.wins1, wins2: entry.series.wins2 };
     advancePlayoffSeries(entry.series, score1, score2);
     entry.played = true;
     simulateRemainingCalendarGamesToday();
@@ -2322,6 +2334,7 @@ function simulateRemainingCalendarGamesToday() {
         if (!e.played && !e.series.winner &&
             e.series.team1 !== selectedTeam && e.series.team2 !== selectedTeam) {
             const { score1, score2 } = simulatePlayoffGame(e.series);
+            e.snapshot = { gameNum: e.gameNum, wins1: e.series.wins1, wins2: e.series.wins2 };
             advancePlayoffSeries(e.series, score1, score2);
             e.played = true;
         }
@@ -2475,10 +2488,15 @@ function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName, oppTe
     window._playoffStatsCallback = callback || null;
     window._playoffCurrentSeries = series;
 
+    const homeGames = [0, 1, 4, 6];
+    const team1IsHome = homeGames.includes(series.games.length); // games.length = gameNum being played
+    const visitor = team1IsHome ? t2 : t1;
+    const home    = team1IsHome ? t1 : t2;
+
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
-            <h3>Game stats: ${t1} vs ${t2}</h3>
+            <h3>Game stats: ${visitor} @ ${home}</h3>
             <div style="display:flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${userTeamName} (${userScore})</h4>
