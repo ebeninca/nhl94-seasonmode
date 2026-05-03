@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NHL 94 Season Mode</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Main Menu Screen -->
+    <div id="mainMenu" class="main-menu screen active">
+        <h1 class="logo">NHL 94</h1>
+        <p class="subtitle">Season Mode</p>
+        
+        <button class="menu-button" onclick="showNewGame()">New Game</button>
+        <button class="menu-button" onclick="continueGame()" id="continueBtn" disabled>Continue Game</button>
+        <button class="menu-button" onclick="triggerImport()">Import Save File</button>
+        <button class="menu-button" onclick="showCredits()">Credits</button>
+        
+        <!-- Hidden file input for importing -->
+        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importSave(this.files[0])">
+    </div>
+    
+    <!-- New Game Screen -->
+    <div id="newGameScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="showMainMenu()">← Back to Main Menu</button>
+            
+            <div class="header">
+                <h1>Select Your Team</h1>
+                <p>1993-94 NHL Season</p>
+            </div>
+            
+            <div class="team-selection" id="teamGrid"></div>
+            
+            <div style="text-align: center;">
+                <button class="btn" id="startSeason" onclick="startSeason()" disabled>Start Season</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="gameScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="backToMainMenuOrSeasonOver()">← Main Menu</button>
+            
+            <div class="current-date" id="currentDate"></div>
+            
+            <div class="game-interface">
+                <div class="main-panel">
+                   <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+    <button class="btn" onclick="previousDate()" id="prevDateBtn">← Previous Date</button>
+    <button class="btn" onclick="nextDate()" id="nextDateBtn">Next Date →</button>
+    <button class="btn" onclick="showStandings()">Standings</button>
+    <button class="btn" onclick="showLeagueLeaders()">League Leaders</button>
+    <button class="btn" onclick="event.stopPropagation(); saveGame();">Save Game</button>
+    <button class="btn" onclick="event.stopPropagation(); exportSave();">Export Save</button>
+    <button class="btn" style="background: linear-gradient(135deg, #e53935, #b71c1c);" onclick="confirmEndSeason()">End Season Now</button>
+</div>
+                    
+                    <div id="scheduleView">
+                        <h3>Games Today</h3>
+                        <div id="gamesToday"></div>
+                    </div>
+                </div>
+                
+                <div class="sidebar">
+                    <h3>Your Team</h3>
+                    <div id="teamInfo"></div>
+                    
+                    <h3>Game Tips</h3>
+                    <div>
+                        <p><strong>Navigation:</strong> Use Previous/Next Date buttons to move through the schedule</p>
+                        <p><strong>Your Games:</strong> Enter scores and click Submit before advancing</p>
+                        <p><strong>Standings:</strong> Click Standings to view league tables</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Player Stats Screen -->
+    <div id="playerStatsScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="backToGame()">← Back to Game</button>
+            
+            <div class="header">
+                <h1>League Leaders</h1>
+            </div>
+
+            <div class="player-stats-filters">
+                <button id="filter-league" onclick="showLeagueLeaders('league')">League</button>
+                <button id="filter-eastern" onclick="showLeagueLeaders('eastern')">Eastern Conference</button>
+                <button id="filter-western" onclick="showLeagueLeaders('western')">Western Conference</button>
+                <button id="filter-atlantic" onclick="showLeagueLeaders('atlantic')">Atlantic</button>
+                <button id="filter-northeast" onclick="showLeagueLeaders('northeast')">Northeast</button>
+                <button id="filter-central" onclick="showLeagueLeaders('central')">Central</button>
+                <button id="filter-pacific" onclick="showLeagueLeaders('pacific')">Pacific</button>
+                <button id="filter-team" onclick="showLeagueLeaders('team')">Your Team</button>
+            </div>
+            
+            <div id="playerStatsTable"></div>
+        </div>
+    </div>
+
+    <!-- Standings Screen -->
+    <div id="standingsScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="backToGame()">← Back to Game</button>
+            
+            <div class="header">
+                <h1>Season Standings</h1>
+            </div>
+            
+            <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; justify-content: center;">
+    <button class="btn" onclick="showStandingsBy('league')">League</button>
+    <button class="btn" onclick="showStandingsBy('eastern')">Eastern Conference</button>
+    <button class="btn" onclick="showStandingsBy('western')">Western Conference</button>
+    <button class="btn" onclick="showStandingsBy('atlantic')">Atlantic</button>
+    <button class="btn" id="filter-northeast" onclick="showStandingsBy('northeast')">Northeast</button>
+    <button class="btn" id="filter-central" onclick="showStandingsBy('central')">Central</button>
+    <button class="btn" id="filter-pacific" onclick="showStandingsBy('pacific')">Pacific</button>
+</div>
+            
+            <div id="standingsTable"></div>
+        </div>
+    </div>
+
+    <!-- Season Over Screen -->
+    <div id="seasonOverScreen" class="screen">
+        <div class="container">
+            <div style="text-align: center; padding: 40px;">
+                <h1 class="logo">Season Over!</h1>
+                <p class="subtitle">The regular season has concluded.</p>
+                <br>
+                <button class="menu-button" onclick="showStandings()">View Final Standings</button>
+                <button class="menu-button" onclick="showLeagueLeaders()">View Final League Leaders</button>
+                <button class="menu-button" onclick="initPlayoffs()">Start Playoffs!</button>
+                <button class="menu-button" onclick="saveAndExportFinal()">Save and Export File</button>
+                <button class="menu-button" onclick="showMainMenu()">Back to Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playoff Bracket Screen -->
+    <div id="playoffScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="showSeasonOverScreen()">← Back to Season</button>
+            <div class="header">
+                <h1>Stanley Cup Playoffs</h1>
+                <p>1993-94 NHL Playoffs</p>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; justify-content:center;">
+                <button class="btn" onclick="showPlayoffLeaders()">Playoff Stats</button>
+                <button class="btn" onclick="saveGame()">Save Game</button>
+                <button class="btn" onclick="exportSave()">Export Save</button>
+            </div>
+            <div id="playoffBracket"></div>
+        </div>
+    </div>
+
+    <!-- Playoff Stats Screen -->
+    <div id="playoffStatsScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="showPlayoffScreen()">← Back to Bracket</button>
+            <div class="header"><h1>Playoff Leaders</h1></div>
+            <div id="playoffStatsTable"></div>
+        </div>
+    </div>
+
+    <!-- Credits Screen -->
+    <div id="creditsScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="backToMainMenuOrSeasonOver()">← Back to Main Menu</button>
+            
+            <div style="text-align: center; padding: 40px;">
+                <h3>NHL 94 Season Mode</h3>
+                <p>Recreation of the classic EA Sports NHL 94</p>
+                <p>Built for the 1993-94 NHL Season</p>
+                <br>
+                <p><strong>Original Game:</strong> EA Sports</p>
+                <p><strong>Season Mode Recreation:</strong> Banjo</p>
+                <p><strong>Year:</strong> 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="modal" class="modal" onclick="if(event.target === this) closeModal(event)">
+        <div class="modal-content" id="modalContent">
+            <p id="modalMessage">Message goes here.</p>
+            <div id="modalButtons" class="modal-buttons">
+                <button class="btn" onclick="closeModal()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+<p style="display: none;">Thanks for finding me. Stay in school, vibe coding is a joke. Heja Tingsryd!</p>
+</body>
+</html>
