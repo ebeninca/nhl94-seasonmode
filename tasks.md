@@ -18,14 +18,16 @@
 
 - [x] ajustar os brackets, ja pre renderizar a arvore completa inteira antes mesmo de saber o resultado, sendo que os brackets devem ir sentido centro da tela ate o bracket central da stanley cup
 
+- [x] Playoffs usar @ ao inves de versus, alternar jogos fora e dentro de casa como na vida real
 
+## v003
+
+- [x] Ajuste de ordenação de telas de leaders
+
+- [x] Ajuste de sequencia de telas ao final da temporada
 
 # Futuro
 
-Apresentar a tela de estatistica ja ordenada por P (Points)
-
 Ajustar layout da tela de selecao de time, mais lado a lado, bota start mais acessivel
-
-Playoffs usar @ ao inves de versus, alternar jogos fora e dentro de casa como na vida real
 
 Manter historico em arquivo associado a aplicação sem necessidade de importar/exportar json

@@ -133,8 +133,8 @@
                 <h1 class="logo">Season Over!</h1>
                 <p class="subtitle">The regular season has concluded.</p>
                 <br>
-                <button class="menu-button" onclick="showStandings()">View Final Standings</button>
-                <button class="menu-button" onclick="showLeagueLeaders()">View Final League Leaders</button>
+                <button class="menu-button" onclick="window._backToSeasonOver=true; showStandings()">View Final Standings</button>
+                <button class="menu-button" onclick="window._backToSeasonOver=true; showLeagueLeaders()">View Final League Leaders</button>
                 <button class="menu-button" onclick="initPlayoffs()">Start Playoffs!</button>
                 <button class="menu-button" onclick="saveAndExportFinal()">Save and Export File</button>
                 <button class="menu-button" onclick="showMainMenu()">Back to Main Menu</button>

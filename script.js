@@ -725,8 +725,13 @@ function showLeagueLeaders(filter = 'league', sortColumn = 'points', direction =
 }
 
 function backToGame() {
-  hideAllScreens();
-  document.getElementById('gameScreen').classList.add('active');
+  if (window._backToSeasonOver) {
+    window._backToSeasonOver = false;
+    showSeasonOverScreen();
+  } else {
+    hideAllScreens();
+    document.getElementById('gameScreen').classList.add('active');
+  }
 }
 
 function hideAllScreens() {
@@ -1553,18 +1558,13 @@ function renderLeagueLeaders() {
     }
     
     const sortedPlayers = allPlayers.sort((a, b) => {
-        const sortOrder = sortDirection === 'desc' ? -1 : 1;
-        let comparison = 0;
-        
+        const dir = sortDirection === 'asc' ? -1 : 1;
         if (currentSortColumn === 'points') {
-            if (b.points !== a.points) comparison = b.points - a.points;
-            else if (b.goals !== a.goals) comparison = b.goals - a.goals;
-            else comparison = b.assists - a.assists;
-        } else {
-            comparison = (b[currentSortColumn] - a[currentSortColumn]);
+            if (b.points !== a.points) return (b.points - a.points) * dir;
+            if (b.goals !== a.goals) return (b.goals - a.goals) * dir;
+            return (b.assists - a.assists) * dir;
         }
-        
-        return comparison * sortOrder;
+        return (b[currentSortColumn] - a[currentSortColumn]) * dir;
     });
 
     let title = 'League Leaders';
@@ -1593,11 +1593,11 @@ function renderLeagueLeaders() {
                 <tr>
                     <th>Spelare</th>
                     <th>Lag</th>
-                    <th onclick="showLeagueLeaders(currentFilter, 'gp', sortDirection === 'asc' ? 'desc' : 'asc')">GP</th>
-                    <th onclick="showLeagueLeaders(currentFilter, 'goals', sortDirection === 'asc' ? 'desc' : 'asc')">M</th>
-                    <th onclick="showLeagueLeaders(currentFilter, 'assists', sortDirection === 'asc' ? 'desc' : 'asc')">A</th>
-                    <th onclick="showLeagueLeaders(currentFilter, 'points', sortDirection === 'asc' ? 'desc' : 'asc')">P</th>
-                    <th onclick="showLeagueLeaders(currentFilter, 'pim', sortDirection === 'asc' ? 'desc' : 'asc')">PIM</th>
+                    <th onclick="showLeagueLeaders(currentFilter, 'gp', currentSortColumn === 'gp' && sortDirection === 'desc' ? 'asc' : 'desc')">GP${currentSortColumn === 'gp' ? (sortDirection === 'desc' ? ' ▼' : ' ▲') : ''}</th>
+                    <th onclick="showLeagueLeaders(currentFilter, 'goals', currentSortColumn === 'goals' && sortDirection === 'desc' ? 'asc' : 'desc')">M${currentSortColumn === 'goals' ? (sortDirection === 'desc' ? ' ▼' : ' ▲') : ''}</th>
+                    <th onclick="showLeagueLeaders(currentFilter, 'assists', currentSortColumn === 'assists' && sortDirection === 'desc' ? 'asc' : 'desc')">A${currentSortColumn === 'assists' ? (sortDirection === 'desc' ? ' ▼' : ' ▲') : ''}</th>
+                    <th onclick="showLeagueLeaders(currentFilter, 'points', currentSortColumn === 'points' && sortDirection === 'desc' ? 'asc' : 'desc')">P${currentSortColumn === 'points' ? (sortDirection === 'desc' ? ' ▼' : ' ▲') : ''}</th>
+                    <th onclick="showLeagueLeaders(currentFilter, 'pim', currentSortColumn === 'pim' && sortDirection === 'desc' ? 'asc' : 'desc')">PIM${currentSortColumn === 'pim' ? (sortDirection === 'desc' ? ' ▼' : ' ▲') : ''}</th>
                 </tr>
             </thead>
             <tbody>
@@ -1791,6 +1791,12 @@ function continueGame() {
     currentDate  = new Date(gameState.currentDate);
     teamStats    = gameState.teamStats;
     playoffState = gameState.playoffState || null;
+    if (playoffState && playoffState.calendar) {
+        playoffState.calendar = playoffState.calendar.map(e => ({
+            ...e,
+            date: new Date(e.date)
+        }));
+    }
     playoffView  = gameState.playoffView || 'calendar';
     playoffCurrentDate = gameState.playoffCurrentDate ? new Date(gameState.playoffCurrentDate) : null;
 
@@ -2700,15 +2706,29 @@ function renderSeriesCard(series) {
     </div>`;
 }
 
+let playoffSortCol = 'points';
+let playoffSortDir = 'desc';
+
 function showPlayoffLeaders() {
     hideAllScreens();
     document.getElementById('playoffStatsScreen').classList.add('active');
+    playoffSortCol = 'points';
+    playoffSortDir = 'desc';
+    renderPlayoffLeaders();
+}
+
+function sortPlayoffLeaders(col) {
+    if (playoffSortCol === col) {
+        playoffSortDir = playoffSortDir === 'desc' ? 'asc' : 'desc';
+    } else {
+        playoffSortCol = col;
+        playoffSortDir = 'desc';
+    }
     renderPlayoffLeaders();
 }
 
 function renderPlayoffLeaders() {
     let allPlayers = [];
-    // Only include teams that participated in playoffs
     const playoffTeams = new Set();
     if (playoffState) {
         playoffState.rounds.forEach(round => {
@@ -2725,14 +2745,25 @@ function renderPlayoffLeaders() {
     });
 
     allPlayers.sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.goals !== a.goals) return b.goals - a.goals;
-        return b.assists - a.assists;
+        const dir = playoffSortDir === 'asc' ? -1 : 1;
+        if (playoffSortCol === 'points') {
+            if (b.points !== a.points) return (b.points - a.points) * dir;
+            if (b.goals !== a.goals) return (b.goals - a.goals) * dir;
+            return (b.assists - a.assists) * dir;
+        }
+        return (b[playoffSortCol] - a[playoffSortCol]) * dir;
     });
+
+    const arrow = col => col === playoffSortCol ? (playoffSortDir === 'desc' ? ' ▼' : ' ▲') : '';
 
     let html = `<h3 style="text-align:center; margin-bottom:20px;">Playoff Leaders</h3>
         <table class="player-stats-table"><thead><tr>
-            <th>Player</th><th>Team</th><th>GP</th><th>G</th><th>A</th><th>P</th><th>PIM</th>
+            <th>Player</th><th>Team</th>
+            <th onclick="sortPlayoffLeaders('gp')" style="cursor:pointer;">GP${arrow('gp')}</th>
+            <th onclick="sortPlayoffLeaders('goals')" style="cursor:pointer;">G${arrow('goals')}</th>
+            <th onclick="sortPlayoffLeaders('assists')" style="cursor:pointer;">A${arrow('assists')}</th>
+            <th onclick="sortPlayoffLeaders('points')" style="cursor:pointer;">P${arrow('points')}</th>
+            <th onclick="sortPlayoffLeaders('pim')" style="cursor:pointer;">PIM${arrow('pim')}</th>
         </tr></thead><tbody>`;
     allPlayers.forEach(p => {
         html += `<tr><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.points}</td><td>${p.pim}</td></tr>`;
