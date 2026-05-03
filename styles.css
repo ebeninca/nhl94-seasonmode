@@ -266,61 +266,56 @@ body {
 
 .bracket-container {
     display: grid;
-    grid-template-columns: 1fr 200px 1fr;
-    gap: 30px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
     margin-top: 30px;
-    align-items: start;
+    align-items: center;
+    overflow-x: auto;
 }
 
-.conference {
-    background: rgba(0,0,0,0.6);
-    border: 2px solid #4CAF50;
-    border-radius: 10px;
-    padding: 20px;
+.bracket-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 8px;
 }
 
-.conference h3 {
+.bracket-col-label {
     text-align: center;
-    margin-bottom: 20px;
-    color: #fff;
-}
-
-.stanley-cup-final {
-    background: rgba(255,215,0,0.2);
-    border: 2px solid #FFD700;
-    border-radius: 10px;
-    padding: 20px;
-    text-align: center;
-}
-
-.stanley-cup-final h3 {
-    color: #FFD700;
-    margin-bottom: 20px;
-}
-
-.bracket-round {
-    margin-bottom: 30px;
-}
-
-.bracket-round h4 {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #ccc;
     font-size: 1em;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 6px;
+    min-height: 2em;
+}
+
+.bracket-col-final {
+    background: rgba(255,215,0,0.1);
+    border: 1px solid #FFD700;
+    border-radius: 10px;
+    padding: 10px;
+    align-self: flex-start;
 }
 
 .matchup {
     background: rgba(255,255,255,0.1);
     border: 1px solid #666;
     border-radius: 8px;
-    margin: 10px 0;
-    padding: 15px;
+    margin: 4px 0;
+    padding: 8px;
+    font-size: 0.82em;
 }
 
 .matchup .team {
     font-weight: bold;
     color: white;
     margin: 5px 0;
+}
+
+.bracket-team {
+    font-size: 1.2em;
+    letter-spacing: 1px;
+    text-align: center;
 }
 
 .matchup .series-score {
@@ -358,7 +353,7 @@ body {
     }
     
     .bracket-container {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(4, 1fr);
     }
 }
 

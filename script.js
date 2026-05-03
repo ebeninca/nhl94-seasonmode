@@ -576,8 +576,21 @@ const players = {
     }
 };
 
-const top50Goals = [
-    'Pavel Bure', 'Brett Hull', 'Sergei Fedorov', 'Dave Andreychuk', 'Brendan Shanahan', 'Ray Sheppard', 'Adam Graves', 'Mike Modano', 'Cam Neely', 'Jeremy Roenick', 'Wendel Clark', 'Eric Lindros', 'Luc Robitaille', 'Steve Thomas', 'Kevin Stevens', 'Gary Roberts', 'Keith Tkachuk', 'Geoff Sanderson', 'Mark Recchi', 'Robert Reichel', 'Vincent Damphousse', 'Theo Fleury', 'Bob Kudelski', 'Wayne Gretzky', 'Pierre Turgeon', 'Mikael Renberg', 'Joe Mullen', 'Pat Verbeek', 'John MacLean', 'Joe Nieuwendyk', 'Stéphane Richer', 'Benoit Hogue', 'Rod Brind\'Amour', 'Dale Hawerchuk', 'Vyacheslav Kozlov', 'Mike Gartner', 'Nelson Emerson', 'Brian Bellows', 'Jason Arnott', 'Adam Oates', 'Jaromír Jágr', 'Mats Sundin', 'Alexander Mogilny', 'Dave Gagner', 'Trevor Linden', 'Jari Kurri', 'Keith Primeau', 'Joe Murphy', 'Bryan Smolinski', 'Alexei Yashin'
+const teamAbbr = {
+    'Boston Bruins': 'BOS', 'Buffalo Sabres': 'BUF', 'Hartford Whalers': 'HFD',
+    'Montreal Canadiens': 'MTL', 'Ottawa Senators': 'OTT', 'Pittsburgh Penguins': 'PIT',
+    'Quebec Nordiques': 'QUE', 'New Jersey Devils': 'NJD', 'New York Islanders': 'NYI',
+    'New York Rangers': 'NYR', 'Philadelphia Flyers': 'PHI', 'Florida Panthers': 'FLA',
+    'Tampa Bay Lightning': 'TBL', 'Washington Capitals': 'WSH', 'Chicago Blackhawks': 'CHI',
+    'Dallas Stars': 'DAL', 'Detroit Red Wings': 'DET', 'St. Louis Blues': 'STL',
+    'Toronto Maple Leafs': 'TOR', 'Winnipeg Jets': 'WPG', 'Calgary Flames': 'CGY',
+    'Edmonton Oilers': 'EDM', 'Los Angeles Kings': 'LAK', 'Mighty Ducks of Anaheim': 'ANA',
+    'San Jose Sharks': 'SJS', 'Vancouver Canucks': 'VAN'
+};
+
+function abbr(team) { return teamAbbr[team] || team; }
+
+const top50Goals = [ 'Brett Hull', 'Sergei Fedorov', 'Dave Andreychuk', 'Brendan Shanahan', 'Ray Sheppard', 'Adam Graves', 'Mike Modano', 'Cam Neely', 'Jeremy Roenick', 'Wendel Clark', 'Eric Lindros', 'Luc Robitaille', 'Steve Thomas', 'Kevin Stevens', 'Gary Roberts', 'Keith Tkachuk', 'Geoff Sanderson', 'Mark Recchi', 'Robert Reichel', 'Vincent Damphousse', 'Theo Fleury', 'Bob Kudelski', 'Wayne Gretzky', 'Pierre Turgeon', 'Mikael Renberg', 'Joe Mullen', 'Pat Verbeek', 'John MacLean', 'Joe Nieuwendyk', 'Stéphane Richer', 'Benoit Hogue', 'Rod Brind\'Amour', 'Dale Hawerchuk', 'Vyacheslav Kozlov', 'Mike Gartner', 'Nelson Emerson', 'Brian Bellows', 'Jason Arnott', 'Adam Oates', 'Jaromír Jágr', 'Mats Sundin', 'Alexander Mogilny', 'Dave Gagner', 'Trevor Linden', 'Jari Kurri', 'Keith Primeau', 'Joe Murphy', 'Bryan Smolinski', 'Alexei Yashin'
 ];
 
 const top50Assists = [
@@ -2253,7 +2266,7 @@ function renderPlayoffCalendarView() {
             const gameIndex = entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1;
             const last = s.games[gameIndex];
             if (last) html += `<div>Final: ${last.score1} - ${last.score2}</div>`;
-            if (s.winner && entry.gameNum === s.games.length - 1) html += `<div style="color:#4CAF50;">Series winner: ${s.winner}</div>`;
+            if (s.winner && entry.gameNum === s.games.length - 1) html += `<div style="color:#4CAF50; margin-top:4px;">W: ${abbr(s.winner)}</div>`;
         } else if (isUser) {
             html += `<div style="margin-top:8px;">
                 <input type="number" class="score-input" id="pcal-s1-${idx}" min="0" max="20" placeholder="0">
@@ -2613,70 +2626,62 @@ function renderPlayoffBracket() {
     const container = document.getElementById('playoffBracket');
     if (!container) return;
 
-    // Build a full 4-round structure with TBD placeholders
-    // rounds[0]=R1(8 series), rounds[1]=Semis(4), rounds[2]=ConfFinals(2), rounds[3]=SCFinal(1)
     const allRounds = [[], [], [], []];
-    playoffState.rounds.forEach((round, ri) => {
-        allRounds[ri] = round;
-    });
-    // Fill missing rounds with TBD placeholders
-    const eastR1 = allRounds[0].filter(s => s.conf === 'Eastern');
-    const westR1 = allRounds[0].filter(s => s.conf === 'Western');
-
-    // For each conference, build 3 rounds (R1=4, Semis=2, Finals=1) + center Final
-    function getSeriesForSlot(conf, roundIdx, slotIdx) {
-        const round = allRounds[roundIdx];
-        if (!round || round.length === 0) return null;
-        const confSeries = round.filter(s => s.conf === conf || (roundIdx === 3 && s.conf === 'Final'));
-        return confSeries[slotIdx] || null;
-    }
+    playoffState.rounds.forEach((round, ri) => { allRounds[ri] = round; });
 
     const roundNames = ['First Round', 'Conf. Semifinals', 'Conf. Finals'];
 
-    function renderConfColumn(conf) {
-        let html = `<div class="conference"><h3>${conf} Conference</h3>`;
-        for (let ri = 0; ri < 3; ri++) {
-            const round = allRounds[ri];
-            const confSeries = round ? round.filter(s => s.conf === conf) : [];
-            const slotsNeeded = [4, 2, 1][ri];
-            html += `<div class="bracket-round"><h4>${roundNames[ri]}</h4>`;
-            for (let si = 0; si < slotsNeeded; si++) {
-                const s = confSeries[si] || null;
-                html += s ? renderSeriesCard(s) : renderTBDCard();
-            }
-            html += `</div>`;
+    // Layout: West R1 | West Semis | West Finals | SCF | East Finals | East Semis | East R1
+    // 7 columns total
+    function colHtml(conf, ri) {
+        const round = allRounds[ri];
+        const confSeries = round ? round.filter(s => s.conf === conf) : [];
+        const slots = [4, 2, 1][ri];
+        const label = roundNames[ri];
+        let html = `<div class="bracket-col">`;
+        html += `<div class="bracket-col-label">${label}</div>`;
+        for (let si = 0; si < slots; si++) {
+            const s = confSeries[si] || null;
+            html += s ? renderSeriesCard(s) : renderTBDCard();
         }
         html += `</div>`;
         return html;
     }
 
     let html = '';
-
     if (playoffState.champion) {
-        html += `<div style="text-align:center; padding:20px; background:rgba(255,215,0,0.2); border:2px solid #FFD700; border-radius:10px; margin-bottom:20px;">
+        html += `<div style="text-align:center; padding:15px; background:rgba(255,215,0,0.2); border:2px solid #FFD700; border-radius:10px; margin-bottom:20px;">
             <h2 style="color:#FFD700;">🏆 Stanley Cup Champion: ${playoffState.champion} 🏆</h2></div>`;
     }
 
     html += `<div class="bracket-container">`;
-    html += renderConfColumn('Eastern');
+
+    // Western side (left): R1 outermost, Finals innermost
+    html += colHtml('Western', 0);
+    html += colHtml('Western', 1);
+    html += colHtml('Western', 2);
 
     // Center: Stanley Cup Final
-    html += `<div class="stanley-cup-final"><h3>🏆 Stanley Cup Final</h3>`;
     const finalSeries = allRounds[3] && allRounds[3][0];
+    html += `<div class="bracket-col bracket-col-final">`;
+    html += `<div class="bracket-col-label" style="color:#FFD700;">🏆 Stanley Cup Final</div>`;
     html += finalSeries ? renderSeriesCard(finalSeries) : renderTBDCard();
     html += `</div>`;
 
-    html += renderConfColumn('Western');
-    html += `</div>`;
+    // Eastern side (right): Finals innermost, R1 outermost
+    html += colHtml('Eastern', 2);
+    html += colHtml('Eastern', 1);
+    html += colHtml('Eastern', 0);
 
+    html += `</div>`;
     container.innerHTML = html;
 }
 
 function renderTBDCard() {
     return `<div class="matchup">
-        <div class="team" style="color:#666;">TBD</div>
-        <div class="series-score" style="color:#555;">- vs -</div>
-        <div class="team" style="color:#666;">TBD</div>
+        <div class="team bracket-team" style="color:#555;">TBD</div>
+        <div class="series-score">- : -</div>
+        <div class="team bracket-team" style="color:#555;">TBD</div>
     </div>`;
 }
 
@@ -2685,14 +2690,13 @@ function renderSeriesCard(series) {
     let cls = 'matchup';
     if (isUserSeries) cls += ' user-team';
 
-    const t1cls = series.winner === series.team1 ? 'team winner' : (series.winner ? 'team eliminated' : 'team');
-    const t2cls = series.winner === series.team2 ? 'team winner' : (series.winner ? 'team eliminated' : 'team');
+    const t1cls = series.winner === series.team1 ? 'team bracket-team winner' : (series.winner ? 'team bracket-team eliminated' : 'team bracket-team');
+    const t2cls = series.winner === series.team2 ? 'team bracket-team winner' : (series.winner ? 'team bracket-team eliminated' : 'team bracket-team');
 
     return `<div class="${cls}">
-        <div class="${t1cls}">${series.team1}</div>
+        <div class="${t1cls}">${abbr(series.team1)}</div>
         <div class="series-score">${series.wins1} - ${series.wins2}</div>
-        <div class="${t2cls}">${series.team2}</div>
-        ${series.winner ? `<div style="color:#4CAF50; font-size:0.85em; text-align:center;">Winner: ${series.winner}</div>` : ''}
+        <div class="${t2cls}">${abbr(series.team2)}</div>
     </div>`;
 }
 
