@@ -1,9 +1,37 @@
 # NHL94 Season Mode
 
-O codigo dessa aplicação permite simular a função de Temporadas no jogo NHL 94 de Sega Genesis, função que não existe no jogo.
+> Honorable mention to Banjo for starting this project
 
-A ideia é escolher um time, jogar e preencher o resultado e estatisticas de seus jogos enquantos os resultados dos adversarios sao simulados pela propria aplicação.
+This application simulates the Season Mode for the Sega Genesis game NHL 94, a feature that doesn't exist in the original game.
 
-# Novas Funcionalidades
+The idea is to pick a team, play your games and enter the results and stats, while the opponents' results are simulated by the application itself.
 
-Suporte a playoffs, verificar arquivo tasks.md
+![playoffs](./images/screen-brackets.jpg)
+
+# New Features
+
+Playoff support, see tasks.md for details.
+
+# Running
+
+## Install Node.js via dnf
+sudo dnf module enable nodejs:22
+sudo dnf install nodejs npm -y
+
+## Verify
+node --version
+npm --version
+
+## Install Vite
+cd nhl94-seasonmode
+npm init -y
+npm install --save-dev vite
+
+## Dev server (hot reload):
+npx vite
+
+## Build for production:
+npx vite build
+
+## Preview the production build:
+npx vite preview

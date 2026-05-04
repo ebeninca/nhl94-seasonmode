@@ -1,0 +1,18 @@
+{
+  "name": "nhl94-seasonmode",
+  "version": "1.0.0",
+  "description": "O codigo dessa aplicação permite simular a função de Temporadas no jogo NHL 94 de Sega Genesis, função que não existe no jogo.",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^8.0.10"
+  }
+}

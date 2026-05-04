@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
     <title>NHL 94 Season Mode</title>
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -136,6 +137,7 @@
                 <button class="menu-button" onclick="window._backToSeasonOver=true; showStandings()">View Final Standings</button>
                 <button class="menu-button" onclick="window._backToSeasonOver=true; showLeagueLeaders()">View Final League Leaders</button>
                 <button class="menu-button" onclick="initPlayoffs()">Start Playoffs!</button>
+                <button class="menu-button" onclick="continuePlayoffs()" id="continuePlayoffsBtn" disabled>Continue Playoffs</button>
                 <button class="menu-button" onclick="saveAndExportFinal()">Save and Export File</button>
                 <button class="menu-button" onclick="showMainMenu()">Back to Main Menu</button>
             </div>
@@ -151,8 +153,8 @@
                 <p>1993-94 NHL Playoffs</p>
             </div>
             <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; justify-content:center;">
-                <button class="btn player-stats-filters" id="btnViewCalendar" onclick="switchPlayoffView('calendar')">Calendar</button>
-                <button class="btn player-stats-filters" id="btnViewBracket" onclick="switchPlayoffView('bracket')">Bracket</button>
+                <button class="btn" id="btnViewCalendar" onclick="switchPlayoffView('calendar')">Calendar</button>
+                <button class="btn" id="btnViewBracket" onclick="switchPlayoffView('bracket')">Bracket</button>
                 <button class="btn" onclick="showPlayoffLeaders()">Playoff Stats</button>
                 <button class="btn" onclick="saveGame()">Save Game</button>
                 <button class="btn" onclick="exportSave()">Export Save</button>
@@ -182,8 +184,8 @@
                 <p>Built for the 1993-94 NHL Season</p>
                 <br>
                 <p><strong>Original Game:</strong> EA Sports</p>
-                <p><strong>Season Mode Recreation:</strong> Banjo</p>
-                <p><strong>Year:</strong> 2025</p>
+                <p><strong>Season Mode Recreation:</strong> Banjo / ebeninca</p>
+                <p><strong>Year:</strong> 2025 - 2026</p>
             </div>
         </div>
     </div>
@@ -198,7 +200,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="/src/main.js"></script>
 <p style="display: none;">Thanks for finding me. Stay in school, vibe coding is a joke. Heja Tingsryd!</p>
 </body>
 </html>
