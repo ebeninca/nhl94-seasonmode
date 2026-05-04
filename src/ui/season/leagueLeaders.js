@@ -51,11 +51,11 @@ export function renderLeagueLeaders() {
 
     let title = 'League Leaders';
     if (filter === 'eastern' || filter === 'western') {
-        title = `${teams[Object.keys(teams).find(t => teams[t].conference.toLowerCase() === filter)]?.conference} ledare`;
+        title = `${teams[Object.keys(teams).find(t => teams[t].conference.toLowerCase() === filter)]?.conference} Conference Leaders`;
     } else if (filter === 'team' && state.selectedTeam) {
-        title = `${state.selectedTeam} spelarstatistik`;
+        title = `${state.selectedTeam} Player Stats`;
     } else if (filter !== 'league') {
-        title = `${filter.charAt(0).toUpperCase() + filter.slice(1)} divisionens ledare`;
+        title = `${filter.charAt(0).toUpperCase() + filter.slice(1)} Division Leaders`;
     }
 
     document.querySelectorAll('.player-stats-filters button').forEach(b => b.classList.remove('active'));
@@ -68,7 +68,7 @@ export function renderLeagueLeaders() {
 
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="player-stats-table"><thead><tr>
-            <th>Spelare</th><th>Lag</th>
+            <th>Player</th><th>Team</th>
             <th onclick="showLeagueLeaders(currentFilter, 'gp', currentSortColumn === 'gp' && sortDirection === 'desc' ? 'asc' : 'desc')">GP${arrow('gp')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'goals', currentSortColumn === 'goals' && sortDirection === 'desc' ? 'asc' : 'desc')">M${arrow('goals')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'assists', currentSortColumn === 'assists' && sortDirection === 'desc' ? 'asc' : 'desc')">A${arrow('assists')}</th>

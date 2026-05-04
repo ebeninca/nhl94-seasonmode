@@ -35,7 +35,7 @@ export function showStandingsBy(filter) {
 
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="standings-table"><thead><tr>
-            <th>Rank</th><th>Lag</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th>
+            <th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th>
         </tr></thead><tbody>`;
 
     teamsToShow.forEach((team, index) => {

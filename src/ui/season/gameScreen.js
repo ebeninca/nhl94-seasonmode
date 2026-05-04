@@ -111,7 +111,7 @@ export function nextDate() {
     );
 
     if (userGameToday) {
-        showModal('Vänligen fyll i resultatet för din match innan du går vidare.');
+        showModal('Please submit your game result before advancing.');
         return;
     }
 

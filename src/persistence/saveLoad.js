@@ -68,15 +68,15 @@ export function importSave(file) {
             const text = e.target.result;
             const data = JSON.parse(text);
             if (!data.selectedTeam || !data.currentDate || !data.teamStats || !data.allGames) {
-                throw new Error('Ogiltigt sparfilsformat');
+                throw new Error('Invalid save file format');
             }
             window.nhl94SaveData = text;
             try { localStorage.setItem('nhl94SaveData', text); } catch (_) {}
             const btn = document.getElementById('continueBtn');
             if (btn) btn.disabled = false;
-            showModal('Sparfilen importerades framgångsrikt! Välj "Continue Game".');
+            showModal('Save file imported successfully! Select "Continue Game".');
         } catch (err) {
-            showModal('Ogiltig sparfil: ' + err.message);
+            showModal('Invalid save file: ' + err.message);
         }
     };
     reader.readAsText(file);
@@ -85,7 +85,7 @@ export function importSave(file) {
 export function continueGame() {
     try {
         const savedData = window.nhl94SaveData || (typeof localStorage !== 'undefined' && localStorage.getItem('nhl94SaveData'));
-        if (!savedData) { showModal('Inget sparat spel hittades!'); return; }
+        if (!savedData) { showModal('No saved game found!'); return; }
         const gameState = JSON.parse(savedData);
 
         state.selectedTeam = gameState.selectedTeam;
@@ -136,7 +136,7 @@ export function continueGame() {
             updateNavigationButtons();
         }
     } catch (error) {
-        showModal('Det gick inte att ladda spelet: ' + error.message);
+        showModal('Failed to load game: ' + error.message);
     }
 }
 
