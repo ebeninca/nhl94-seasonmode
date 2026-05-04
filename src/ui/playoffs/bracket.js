@@ -9,13 +9,13 @@ export function renderPlayoffBracket() {
     const allRounds = [[], [], [], []];
     state.playoffState.rounds.forEach((round, ri) => { allRounds[ri] = round; });
 
-    const roundNames = ['First Round', 'Conf. Semifinals', 'Conf. Finals'];
+    const roundNames = ['', 'Conf. Semifinals', 'Conf. Finals'];
 
     function colHtml(conf, ri) {
         const round = allRounds[ri];
         const confSeries = round ? round.filter(s => s.conf === conf) : [];
         const slots = [4, 2, 1][ri];
-        const label = roundNames[ri];
+        const label = ri === 0 ? `${conf} Conference` : roundNames[ri];
         let html = `<div class="bracket-col"><div class="bracket-col-label">${label}</div>`;
         for (let si = 0; si < slots; si++) {
             const s = confSeries[si] || null;

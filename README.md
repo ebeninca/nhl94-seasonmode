@@ -6,6 +6,8 @@ This application simulates the Season Mode for the Sega Genesis game NHL 94, a f
 
 The idea is to pick a team, play your games and enter the results and stats, while the opponents' results are simulated by the application itself.
 
+![playoffs](./images/screen-brackets.jpg)
+
 # New Features
 
 Playoff support, see tasks.md for details.
