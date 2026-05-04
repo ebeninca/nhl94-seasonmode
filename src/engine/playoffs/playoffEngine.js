@@ -1,7 +1,6 @@
 import { teams } from '../../data/teams.js';
 import { players } from '../../data/players.js';
 import { state } from '../../state/gameState.js';
-import { updateTeamStats } from '../stats.js';
 import { generatePlayerStats } from '../simulation.js';
 import { updatePlayoffPlayerStats } from './playoffStats.js';
 import { generatePlayoffCalendar, rebuildCalendarForNewRound } from './playoffCalendar.js';
@@ -67,8 +66,6 @@ export function initPlayoffs() {
 export function advancePlayoffSeries(series, score1, score2) {
     series.games.push({ score1, score2 });
     if (score1 > score2) series.wins1++; else series.wins2++;
-
-    updateTeamStats(series.team1, series.team2, score1, score2);
 
     const stats1 = generatePlayerStats(series.team1, score1);
     const stats2 = generatePlayerStats(series.team2, score2);
