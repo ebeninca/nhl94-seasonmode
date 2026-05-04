@@ -25,6 +25,7 @@
 - [x] Separar em botao de start playoffs e continue playoffs
 - [x] Ajustes visuais e de datas nos playoffs
 - [x] alinhamento de texto, alongar os espaços no calendario de playoffs
+- [x] github actions
  
 # Futuro
 
