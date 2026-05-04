@@ -9,6 +9,8 @@ import { updateTeamInfo, updateCurrentDate, showGamesToday, updateNavigationButt
 export function initializeNewGame() {
     state.selectedTeam = null;
     state.currentDate = new Date('1993-10-05');
+    state.seasonOver = false;
+    state.playoffState = null;
     initializeTeamStats();
     initializeSchedule();
     renderTeamSelection();

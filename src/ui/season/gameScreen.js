@@ -126,6 +126,7 @@ export function nextDate() {
         showGamesToday();
         updateTeamInfo();
     } else {
+        state.seasonOver = true;
         state.currentDate = new Date(state.currentDate.setDate(state.currentDate.getDate() + 1));
         showSeasonOverScreen();
         return;

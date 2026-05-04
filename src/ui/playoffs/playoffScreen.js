@@ -37,9 +37,14 @@ export function confirmEndSeason() {
         <p>Are you sure you want to end the season now and start the playoffs?</p>
         <p style="color:#ccc; font-size:0.9em;">The playoffs will use the current standings.</p>
         <div class="modal-buttons">
-            <button class="btn" style="background: linear-gradient(135deg, #e53935, #b71c1c);" onclick="closeModal(); showSeasonOverScreen();">Yes, End Season</button>
+            <button class="btn" style="background: linear-gradient(135deg, #e53935, #b71c1c);" onclick="closeModal(); seasonOverAndShow();">Yes, End Season</button>
             <button class="btn" onclick="closeModal()">Cancel</button>
         </div>
     `;
     document.getElementById('modal').classList.add('show');
+}
+
+export function seasonOverAndShow() {
+    state.seasonOver = true;
+    showSeasonOverScreen();
 }

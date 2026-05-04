@@ -3,6 +3,7 @@ export const state = {
     currentDate: new Date('1993-10-05'),
     teamStats: {},
     allGames: [],
+    seasonOver: false,
     playoffState: null,
     playoffView: 'calendar',
     playoffCurrentDate: null,

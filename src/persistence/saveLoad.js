@@ -2,7 +2,7 @@ import { teams } from '../data/teams.js';
 import { players } from '../data/players.js';
 import { state } from '../state/gameState.js';
 import { showModal } from '../ui/modal.js';
-import { hideAllScreens } from '../ui/navigation.js';
+import { hideAllScreens, showSeasonOverScreen } from '../ui/navigation.js';
 import { updateTeamInfo, updateCurrentDate, showGamesToday, updateNavigationButtons } from '../ui/season/gameScreen.js';
 import { showPlayoffScreen } from '../ui/playoffs/playoffScreen.js';
 
@@ -13,6 +13,7 @@ export function saveGame() {
             currentDate: state.currentDate.toISOString(),
             teamStats: state.teamStats,
             allGames: state.allGames,
+            seasonOver: state.seasonOver,
             playoffState: state.playoffState,
             playoffView: state.playoffView,
             playoffCurrentDate: state.playoffCurrentDate ? state.playoffCurrentDate.toISOString() : null,
@@ -29,6 +30,7 @@ export function saveGame() {
 
 export function exportSave() {
     try {
+        saveGame();
         const savedData = window.nhl94SaveData || (typeof localStorage !== 'undefined' && localStorage.getItem('nhl94SaveData'));
         if (!savedData) { showModal('No saved data found. Save your game before exporting'); return; }
         const gameState = JSON.parse(savedData);
@@ -89,11 +91,24 @@ export function continueGame() {
         state.selectedTeam = gameState.selectedTeam;
         state.currentDate  = new Date(gameState.currentDate);
         state.teamStats    = gameState.teamStats;
+        state.seasonOver   = gameState.seasonOver || false;
         state.playoffState = gameState.playoffState || null;
-        if (state.playoffState && state.playoffState.calendar) {
-            state.playoffState.calendar = state.playoffState.calendar.map(e => ({
-                ...e, date: new Date(e.date)
-            }));
+        if (state.playoffState) {
+            // Rebuild calendar series references to point to the actual round objects
+            // JSON.parse breaks object identity — calendar entries and rounds must share the same series objects
+            const seriesMap = new Map();
+            state.playoffState.rounds.forEach(round => {
+                round.forEach(s => {
+                    seriesMap.set(s.team1 + '|' + s.team2 + '|' + s.conf, s);
+                });
+            });
+            if (state.playoffState.calendar) {
+                state.playoffState.calendar = state.playoffState.calendar.map(e => {
+                    const key = e.series.team1 + '|' + e.series.team2 + '|' + e.series.conf;
+                    const realSeries = seriesMap.get(key) || e.series;
+                    return { ...e, date: new Date(e.date), series: realSeries };
+                });
+            }
         }
         state.playoffView  = gameState.playoffView || 'calendar';
         state.playoffCurrentDate = gameState.playoffCurrentDate ? new Date(gameState.playoffCurrentDate) : null;
@@ -110,6 +125,8 @@ export function continueGame() {
 
         if (state.playoffState) {
             showPlayoffScreen();
+        } else if (state.seasonOver) {
+            showSeasonOverScreen();
         } else {
             hideAllScreens();
             document.getElementById('gameScreen').classList.add('active');
