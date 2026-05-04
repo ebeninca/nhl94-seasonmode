@@ -1,33 +1,33 @@
 # Refactor Plan — NHL94 Season Mode
 
-## Motivação
+## Motivation
 
-O `script.js` atual tem ~2800 linhas com responsabilidades completamente misturadas:
-- Dados estáticos (times, jogadores, listas de all-stars)
-- Estado global do jogo
-- Lógica de simulação
-- Lógica de playoffs
-- Renderização de UI
-- Navegação entre telas
+The original `script.js` had ~2800 lines with completely mixed responsibilities:
+- Static data (teams, players, all-star lists)
+- Global game state
+- Simulation logic
+- Playoff logic
+- UI rendering
+- Screen navigation
 
-Separar em módulos ES6 melhora legibilidade, facilita manutenção e isola responsabilidades.
+Splitting into ES6 modules improves readability, eases maintenance, and isolates responsibilities.
 
 ---
 
-## Estrutura de Pastas Proposta
+## Proposed Folder Structure
 
 ```
 nhl94-seasonmode/
 ├── index.html
 ├── styles.css
-├── main.js                        ← entry point, importa tudo e expõe funções globais ao HTML
 └── src/
+    ├── main.js                    ← entry point, imports everything and exposes global functions to HTML
     ├── data/
     │   ├── teams.js               ← const teams, const teamAbbr, function abbr()
     │   ├── players.js             ← const players
     │   └── lists.js               ← top50Goals, top50Assists, enforcers, allStars, eliteAllStars
     ├── state/
-    │   └── gameState.js           ← variáveis globais: selectedTeam, currentDate, teamStats, allGames, etc.
+    │   └── gameState.js           ← global variables: selectedTeam, currentDate, teamStats, allGames, etc.
     ├── engine/
     │   ├── schedule.js            ← initializeSchedule(), scheduleData[]
     │   ├── simulation.js          ← simulateRealisticGame(), generatePlayerStats(), simulatePlayoffGame()
@@ -54,19 +54,19 @@ nhl94-seasonmode/
 
 ---
 
-## Padrão de Módulos
+## Module Pattern
 
-Usar **ES Modules nativos** (`type="module"`) — sem bundler, sem build step, funciona direto no browser.
+Uses **native ES Modules** (`type="module"`) with Vite as bundler for production builds.
 
 ```html
 <!-- index.html -->
-<script type="module" src="main.js"></script>
+<script type="module" src="/src/main.js"></script>
 ```
 
 ```js
-// main.js — expõe funções ao escopo global para os onclick do HTML
-import { showMainMenu, showNewGame } from './src/ui/navigation.js';
-import { startSeason } from './src/ui/season/teamSelection.js';
+// src/main.js — exposes functions to global scope for HTML onclick handlers
+import { showMainMenu, showNewGame } from './ui/navigation.js';
+import { startSeason } from './ui/season/teamSelection.js';
 // ...
 
 window.showMainMenu = showMainMenu;
@@ -75,15 +75,15 @@ window.startSeason = startSeason;
 // ...
 ```
 
-Cada módulo exporta apenas o que precisa ser usado por outros módulos ou pelo `main.js`.
+Each module exports only what needs to be used by other modules or by `main.js`.
 
 ---
 
-## Estado Compartilhado
+## Shared State
 
-O maior desafio é o estado global (`selectedTeam`, `teamStats`, `allGames`, `playoffState`, etc.) que é lido e escrito por múltiplos módulos.
+The biggest challenge is the global state (`selectedTeam`, `teamStats`, `allGames`, `playoffState`, etc.) that is read and written by multiple modules.
 
-**Solução:** `src/state/gameState.js` exporta um objeto mutável único:
+**Solution:** `src/state/gameState.js` exports a single mutable object:
 
 ```js
 // src/state/gameState.js
@@ -101,26 +101,26 @@ export const state = {
 };
 ```
 
-Todos os módulos importam `state` e leem/escrevem nele diretamente — simples, sem overhead, mantém o comportamento atual.
+All modules import `state` and read/write to it directly — simple, no overhead, preserves existing behavior.
 
 ---
 
-## Ordem de Implementação
+## Implementation Order
 
-1. ✅ Criar estrutura de pastas
-2. ✅ Extrair `src/data/` — sem dependências, mais fácil de começar
-3. ✅ Extrair `src/state/gameState.js`
-4. ✅ Extrair `src/engine/` — depende só de data e state
-5. ✅ Extrair `src/persistence/saveLoad.js`
-6. ✅ Extrair `src/ui/` de dentro para fora (começar pelas folhas: standings, leagueLeaders, bracket)
-7. ✅ Criar `main.js` e atualizar `index.html`
-8. Remover `script.js` (manter como backup até validação completa)
+1. ✅ Create folder structure
+2. ✅ Extract `src/data/` — no dependencies, easiest to start
+3. ✅ Extract `src/state/gameState.js`
+4. ✅ Extract `src/engine/` — depends only on data and state
+5. ✅ Extract `src/persistence/saveLoad.js`
+6. ✅ Extract `src/ui/` from inside out (start with leaves: standings, leagueLeaders, bracket)
+7. ✅ Create `main.js` and update `index.html`
+8. Remove `script.js` (kept as backup until full validation)
 
 ---
 
-## O que NÃO muda
+## What Does NOT Change
 
-- Nenhuma lógica de negócio é alterada
-- Nenhum CSS é alterado
-- O HTML dos templates inline (dentro das funções JS) permanece igual
-- Nenhum bundler ou dependência externa é adicionada
+- No business logic is altered
+- No CSS is altered
+- Inline HTML templates (inside JS functions) remain the same
+- No bundler or external dependency is added (Vite is dev-only)

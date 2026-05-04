@@ -1,34 +1,34 @@
 # Tasks
 
 ## v001
-- [x] Adicionar funcionalidade de playoffs ao final da temporada, seguindo regra de classificação real da epoca, sendo que 16 times se qualificam e jogam em formato mata-mata melhor de 7 até a final da stanley cup.
-- [x] Construir uma tela de playoff brackets que com a stanley cup no centro.
-- [x] Seguindo a mesma logica da que ja existe, os times que não foram escolhidos pelo jogador precisam ter seus jogos e estatisticas simuladas, manter tela de estatisticas para os playoffs tambem.
-- [x] Adicionar botão "End Season Now" com uma mensagem de confirmação "tem certeza?" em ingles, que finaliza a temporada e incia os playoffs utilizando a classificação atual dos times no temporada.
+- [x] Add playoff functionality at the end of the season, following the real classification rules of the era — 16 teams qualify and play in a best-of-7 elimination format up to the Stanley Cup Final.
+- [x] Build a playoff bracket screen with the Stanley Cup in the center.
+- [x] Following the same logic that already exists, teams not chosen by the player must have their games and stats simulated. Keep a stats screen for the playoffs as well.
+- [x] Add an "End Season Now" button with a confirmation message, which ends the season and starts the playoffs using the current team standings.
 
 ## v002
-- [x] Copiar o conceito da tela de calendario do modo temporada para o playoff, aonde eu possa ir simulando os jogos dia a dia, no mesmo modelo da NHL real, aonde jogos de mesma fase de playoffs acontecem no mesmo dia
-- [x] Colocar um botao na tela de playoffs para alternar entre a tela do bracket/arvore e a tela de calendario
-- [x] ajustar os brackets, ja pre renderizar a arvore completa inteira antes mesmo de saber o resultado, sendo que os brackets devem ir sentido centro da tela ate o bracket central da stanley cup
-- [x] Playoffs usar @ ao inves de versus, alternar jogos fora e dentro de casa como na vida real
+- [x] Copy the calendar screen concept from season mode to playoffs, where games can be simulated day by day, following the real NHL model where games of the same playoff round happen on the same day.
+- [x] Add a button on the playoff screen to toggle between the bracket/tree view and the calendar view.
+- [x] Fix brackets — pre-render the full tree before knowing results, with brackets going from the edges toward the center Stanley Cup bracket.
+- [x] Playoffs use @ instead of versus, alternate home and away games like in real life.
 
 ## v003
-- [x] Ajuste de ordenação de telas de leaders
-- [x] Ajuste de sequencia de telas ao final da temporada
+- [x] Fix sorting on leaders screens
+- [x] Fix screen sequence at end of season
 
 ## v004
-- [x] refactoring total
+- [x] Full refactoring
 
-## v005 
-- [x] Arquivo exportado considerando final de temporada
-- [x] Continuar playoffs aceita o insert do proximo jogo porem o botao next nao funciona
-- [x] Separar em botao de start playoffs e continue playoffs
-- [x] Ajustes visuais e de datas nos playoffs
-- [x] alinhamento de texto, alongar os espaços no calendario de playoffs
-- [x] github actions
- 
-# Futuro
+## v005
+- [x] Exported file considers end of season status
+- [x] Continue playoffs accepts next game input but next button now works
+- [x] Separate Start Playoffs and Continue Playoffs buttons
+- [x] Visual and date adjustments in playoffs
+- [x] Text alignment, expand spacing in playoff calendar
+- [x] GitHub Actions
 
-- Permitir a construcao do campeonato com menos times, selecionados
-- Ajustar layout da tela de selecao de time, mais lado a lado, bota start mais acessivel
-- Manter historico em arquivo associado a aplicação sem necessidade de importar/exportar json
+# Future
+
+- Allow building a tournament with fewer, selected teams
+- Improve team selection screen layout — more side by side, start button more accessible
+- Keep history in a file associated with the application without needing to import/export JSON
