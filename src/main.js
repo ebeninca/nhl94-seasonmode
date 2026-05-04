@@ -58,6 +58,10 @@ function initPlayoffsAndShow() {
     showPlayoffScreen();
 }
 
+function continuePlayoffs() {
+    if (state.playoffState) showPlayoffScreen();
+}
+
 // Expose all functions to window for HTML onclick handlers
 Object.assign(window, {
     showMainMenu, showNewGame, showCredits, showSeasonOverScreen,
@@ -70,7 +74,7 @@ Object.assign(window, {
     showModal, closeModal, showPlayerStatsModal, submitPlayerStatsFromModal,
     showPlayoffPlayerStatsModal, submitPlayoffPlayerStats,
     saveGame, exportSave, triggerImport, importSave, continueGame, checkSavedGame,
-    initPlayoffs: initPlayoffsAndShow, showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow,
+    initPlayoffs: initPlayoffsAndShow, continuePlayoffs, showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow,
     playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame,
     showPlayoffLeaders, sortPlayoffLeaders, renderPlayoffLeaders,
     saveAndExportFinal

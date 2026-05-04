@@ -29,12 +29,19 @@ export function addRoundToCalendar(roundIdx, startDate) {
 }
 
 export function rebuildCalendarForNewRound() {
-    const roundStartDates = [
-        new Date('1994-04-18'), new Date('1994-05-02'),
-        new Date('1994-05-16'), new Date('1994-05-26')
-    ];
     const newRoundIdx = state.playoffState.rounds.length - 1;
-    addRoundToCalendar(newRoundIdx, roundStartDates[newRoundIdx]);
+
+    // Find the last played date in the calendar and add a rest gap
+    let lastPlayedDate = null;
+    state.playoffState.calendar.forEach(e => {
+        if (e.played && (!lastPlayedDate || e.date > lastPlayedDate)) {
+            lastPlayedDate = e.date;
+        }
+    });
+    const startDate = new Date(lastPlayedDate || new Date('1994-04-18'));
+    startDate.setDate(startDate.getDate() + 3);
+
+    addRoundToCalendar(newRoundIdx, startDate);
     const next = state.playoffState.calendar.find(e =>
         !e.played && !e.series.winner &&
         state.playoffState.rounds[newRoundIdx].includes(e.series)

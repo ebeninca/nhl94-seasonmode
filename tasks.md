@@ -22,10 +22,12 @@
 ## v005 
 - [x] Arquivo exportado considerando final de temporada
 - [x] Continuar playoffs aceita o insert do proximo jogo porem o botao next nao funciona
-
+- [x] Separar em botao de start playoffs e continue playoffs
+- [x] Ajustes visuais e de datas nos playoffs
+- [x] alinhamento de texto, alongar os espaços no calendario de playoffs
+ 
 # Futuro
 
-- Separar em botao de start playoffs e continue playoffs
 - Permitir a construcao do campeonato com menos times, selecionados
 - Ajustar layout da tela de selecao de time, mais lado a lado, bota start mais acessivel
 - Manter historico em arquivo associado a aplicação sem necessidade de importar/exportar json

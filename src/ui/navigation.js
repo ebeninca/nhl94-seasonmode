@@ -1,4 +1,5 @@
 import { checkSavedGame } from '../persistence/saveLoad.js';
+import { state } from '../state/gameState.js';
 
 export function hideAllScreens() {
     document.querySelectorAll('.screen').forEach(el => {
@@ -21,6 +22,8 @@ export function showCredits() {
 export function showSeasonOverScreen() {
     hideAllScreens();
     document.getElementById('seasonOverScreen').classList.add('active');
+    const btn = document.getElementById('continuePlayoffsBtn');
+    if (btn) btn.disabled = !state.playoffState;
 }
 
 export function backToGame() {

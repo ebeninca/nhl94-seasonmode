@@ -44,7 +44,7 @@ export function renderPlayoffCalendarView() {
         html += `<p style="text-align:center; color:#ccc;">No games scheduled today.</p>`;
     }
 
-    const roundNames = ['First Round', 'Conference Semifinals', 'Conference Finals', 'Stanley Cup Final'];
+    const roundNames = ['FR', 'CSF', 'CF', 'SCF'];
 
     shownEntries.forEach((entry, idx) => {
         const s = entry.series;
@@ -64,7 +64,7 @@ export function renderPlayoffCalendarView() {
         const displayWins2   = entry.snapshot ? entry.snapshot.wins2   : s.wins2;
 
         html += `<div class="${divClass}">`;
-        html += `<div><strong>${roundName}</strong> — Game ${displayGameNum} | Series: ${displayWins1}-${displayWins2}</div>`;
+        html += `<div><strong>${roundName}</strong> — G${displayGameNum} | S: ${abbr(s.team1)} ${displayWins1}-${displayWins2} ${abbr(s.team2)}</div>`;
         html += `<div><strong>${visitor}</strong> @ <strong>${home}</strong></div>`;
 
         if (entry.played) {
