@@ -1,31 +1,31 @@
 // Entry point — imports all modules and exposes functions to global scope for HTML onclick handlers
 
-import { state } from './src/state/gameState.js';
+import { state } from './state/gameState.js';
 
 // Navigation
-import { showMainMenu, hideAllScreens, showCredits, showSeasonOverScreen, backToGame, backToMainMenuOrSeasonOver } from './src/ui/navigation.js';
+import { showMainMenu, hideAllScreens, showCredits, showSeasonOverScreen, backToGame, backToMainMenuOrSeasonOver } from './ui/navigation.js';
 
 // Team selection
-import { initializeNewGame, renderTeamSelection, selectTeam, startSeason } from './src/ui/season/teamSelection.js';
+import { initializeNewGame, renderTeamSelection, selectTeam, startSeason } from './ui/season/teamSelection.js';
 
 // Game screen
-import { showGamesToday, updateTeamInfo, updateCurrentDate, updateNavigationButtons, nextDate, previousDate, submitGameWrapper, simulateMyGame } from './src/ui/season/gameScreen.js';
+import { showGamesToday, updateTeamInfo, updateCurrentDate, updateNavigationButtons, nextDate, previousDate, submitGameWrapper, simulateMyGame } from './ui/season/gameScreen.js';
 
 // Standings & Leaders
-import { showStandings, showStandingsBy } from './src/ui/season/standings.js';
-import { showLeagueLeaders, renderLeagueLeaders } from './src/ui/season/leagueLeaders.js';
+import { showStandings, showStandingsBy } from './ui/season/standings.js';
+import { showLeagueLeaders, renderLeagueLeaders } from './ui/season/leagueLeaders.js';
 
 // Modal
-import { showModal, closeModal, showPlayerStatsModal, submitPlayerStatsFromModal, showPlayoffPlayerStatsModal, submitPlayoffPlayerStats } from './src/ui/modal.js';
+import { showModal, closeModal, showPlayerStatsModal, submitPlayerStatsFromModal, showPlayoffPlayerStatsModal, submitPlayoffPlayerStats } from './ui/modal.js';
 
 // Persistence
-import { saveGame, exportSave, triggerImport, importSave, continueGame, checkSavedGame } from './src/persistence/saveLoad.js';
+import { saveGame, exportSave, triggerImport, importSave, continueGame, checkSavedGame } from './persistence/saveLoad.js';
 
 // Playoffs
-import { initPlayoffs } from './src/engine/playoffs/playoffEngine.js';
-import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './src/engine/playoffs/playoffCalendar.js';
-import { sortPlayoffLeaders, renderPlayoffLeaders } from './src/engine/playoffs/playoffStats.js';
-import { showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason } from './src/ui/playoffs/playoffScreen.js';
+import { initPlayoffs } from './engine/playoffs/playoffEngine.js';
+import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './engine/playoffs/playoffCalendar.js';
+import { sortPlayoffLeaders, renderPlayoffLeaders } from './engine/playoffs/playoffStats.js';
+import { showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason } from './ui/playoffs/playoffScreen.js';
 
 // showNewGame needs initializeNewGame, wired here to avoid circular deps
 function showNewGame() {
