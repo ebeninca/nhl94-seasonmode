@@ -7,3 +7,28 @@ A ideia é escolher um time, jogar e preencher o resultado e estatisticas de seu
 # Novas Funcionalidades
 
 Suporte a playoffs, verificar arquivo tasks.md
+
+# Executando
+
+## Instala Node.js 20 LTS via dnf
+sudo dnf module enable nodejs:20
+sudo dnf install nodejs npm -y
+
+## Verifica
+node --version
+npm --version
+
+## install vite
+cd /home/ebeninca/repo2/nhl94-seasonmode
+npm init -y
+npm install --save-dev vite
+
+
+## Para testar em dev (hot reload):
+npx vite
+
+## Para gerar o dist final:
+npx vite build
+
+## Para servir o dist e testar:
+npx vite preview

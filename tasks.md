@@ -28,6 +28,9 @@
 
 # Futuro
 
+- Continuar playoffs aceita o insert do proximo jogo porem o botao next nao funciona
+- Separar em botao de start playoffs e continue playoffs
+
 Ajustar layout da tela de selecao de time, mais lado a lado, bota start mais acessivel
 
 Manter historico em arquivo associado a aplicação sem necessidade de importar/exportar json
