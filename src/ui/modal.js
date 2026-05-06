@@ -47,6 +47,9 @@ export function showPlayerStatsModal(game, userScore, opponentScore, userTeamNam
     modalContent.innerHTML = `
         <div class="player-stats-modal">
             <h3>Game stats: ${game.visitor} @ ${game.home}</h3>
+            <div class="modal-buttons">
+                <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
+            </div>
             <div style="display:flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${userTeamName}s stats</h4>
@@ -61,14 +64,12 @@ export function showPlayerStatsModal(game, userScore, opponentScore, userTeamNam
                     <div id="opponentPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
             </div>
-            <div class="modal-buttons">
-                <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
             </div>
         </div>
     `;
 
-    const userSkaters = players[userTeamName].forwards.concat(players[userTeamName].defensemen).map(p => p.name);
-    const oppSkaters = players[opponentTeamName].forwards.concat(players[opponentTeamName].defensemen).map(p => p.name);
+    const userSkaters = Object.values(players[userTeamName]).flat().map(p => p.name);
+    const oppSkaters = Object.values(players[opponentTeamName]).flat().map(p => p.name);
 
     const userGoalDiv = document.getElementById('userGoalInputs');
     const userPimDiv = document.getElementById('userPimInputs');
@@ -174,6 +175,9 @@ export function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName
     modalContent.innerHTML = `
         <div class="player-stats-modal">
             <h3>Game stats: ${visitor} @ ${home}</h3>
+            <div class="modal-buttons">
+                <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
+            </div>
             <div style="display:flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${userTeamName} (${userScore})</h4>
@@ -186,14 +190,12 @@ export function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName
                     <div id="playoff-oppPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
             </div>
-            <div class="modal-buttons">
-                <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
             </div>
         </div>
     `;
 
-    const userSkaters = players[userTeamName].forwards.concat(players[userTeamName].defensemen).map(p => p.name);
-    const oppSkaters = players[oppTeamName].forwards.concat(players[oppTeamName].defensemen).map(p => p.name);
+    const userSkaters = Object.values(players[userTeamName]).flat().map(p => p.name);
+    const oppSkaters = Object.values(players[oppTeamName]).flat().map(p => p.name);
 
     const userGoalDiv = document.getElementById('playoff-userGoalInputs');
     const oppGoalDiv = document.getElementById('playoff-oppGoalInputs');
