@@ -1,8 +1,9 @@
 import { teams } from '../../data/teams.js';
 import { players } from '../../data/players.js';
+import { goalieStarters } from '../../data/goalieStarters.js';
 import { state } from '../../state/gameState.js';
-import { generatePlayerStats } from '../simulation.js';
-import { updatePlayoffPlayerStats } from './playoffStats.js';
+import { generatePlayerStats, generateShotsAgainst, pickGameGoalie } from '../simulation.js';
+import { updatePlayoffPlayerStats, updatePlayoffGoalieStats } from './playoffStats.js';
 import { generatePlayoffCalendar, rebuildCalendarForNewRound } from './playoffCalendar.js';
 
 export function getPlayoffSeeds() {
@@ -63,14 +64,23 @@ export function initPlayoffs() {
     state.playoffView = 'calendar';
 }
 
-export function advancePlayoffSeries(series, score1, score2) {
+export function advancePlayoffSeries(series, score1, score2, skipSimStats = false) {
     series.games.push({ score1, score2 });
     if (score1 > score2) series.wins1++; else series.wins2++;
 
-    const stats1 = generatePlayerStats(series.team1, score1);
-    const stats2 = generatePlayerStats(series.team2, score2);
-    updatePlayoffPlayerStats(series.team1, stats1);
-    updatePlayoffPlayerStats(series.team2, stats2);
+    if (!skipSimStats) {
+        const stats1 = generatePlayerStats(series.team1, score1);
+        const stats2 = generatePlayerStats(series.team2, score2);
+        updatePlayoffPlayerStats(series.team1, stats1);
+        updatePlayoffPlayerStats(series.team2, stats2);
+
+        const goalie1 = pickGameGoalie(series.team1);
+        const goalie2 = pickGameGoalie(series.team2);
+        const sa1 = generateShotsAgainst(score2);
+        const sa2 = generateShotsAgainst(score1);
+        updatePlayoffGoalieStats(series.team1, { [goalie1]: { gp: 1, ga: score2, sa: sa1 } });
+        updatePlayoffGoalieStats(series.team2, { [goalie2]: { gp: 1, ga: score1, sa: sa2 } });
+    }
 
     if (series.wins1 === 4) series.winner = series.team1;
     else if (series.wins2 === 4) series.winner = series.team2;

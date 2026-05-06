@@ -1,0 +1,30 @@
+// Starting goalies for 1993-94 season (most games played per team)
+// Based on hockeydb.com stats
+export const goalieStarters = {
+    'Mighty Ducks of Anaheim': 'Guy Hebert',
+    'Boston Bruins': 'Andy Moog',
+    'Buffalo Sabres': 'Dominik Hasek',
+    'Calgary Flames': 'Mike Vernon',
+    'Chicago Blackhawks': 'Ed Belfour',
+    'Dallas Stars': 'Jon Casey',
+    'Detroit Red Wings': 'Tim Cheveldae',
+    'Edmonton Oilers': 'Bill Ranford',
+    'Florida Panthers': 'John Vanbiesbrouck',
+    'Hartford Whalers': 'Sean Burke',
+    'Los Angeles Kings': 'Kelly Hrudey',
+    'Montreal Canadiens': 'Patrick Roy',
+    'New Jersey Devils': 'Chris Terreri',
+    'New York Islanders': 'Glenn Healy',
+    'New York Rangers': 'Mike Richter',
+    'Ottawa Senators': 'Daniel Berthiaume',
+    'Philadelphia Flyers': 'Tommy Soderstrom',
+    'Pittsburgh Penguins': 'Tom Barrasso',
+    'Quebec Nordiques': 'Ron Hextall',
+    'San Jose Sharks': 'Arturs Irbe',
+    'St. Louis Blues': 'Curtis Joseph',
+    'Tampa Bay Lightning': 'Wendell Young',
+    'Toronto Maple Leafs': 'Felix Potvin',
+    'Vancouver Canucks': 'Kirk McLean',
+    'Washington Capitals': 'Don Beaupre',
+    'Winnipeg Jets': 'Bob Essensa'
+};

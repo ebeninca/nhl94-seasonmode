@@ -99,6 +99,11 @@
                 <button id="filter-pacific" onclick="showLeagueLeaders('pacific')">Pacific</button>
                 <button id="filter-team" onclick="showLeagueLeaders('team')">Your Team</button>
             </div>
+
+            <div class="leader-view-toggle" style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+                <button id="view-skaters" class="btn active" onclick="switchLeaderView('skaters')">Skaters</button>
+                <button id="view-goalies" class="btn" onclick="switchLeaderView('goalies')">Goalies</button>
+            </div>
             
             <div id="playerStatsTable"></div>
         </div>
