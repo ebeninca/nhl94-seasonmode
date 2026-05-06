@@ -70,7 +70,7 @@ export function renderLeagueLeaders() {
         <table class="player-stats-table"><thead><tr>
             <th>Player</th><th>Team</th>
             <th onclick="showLeagueLeaders(currentFilter, 'gp', currentSortColumn === 'gp' && sortDirection === 'desc' ? 'asc' : 'desc')">GP${arrow('gp')}</th>
-            <th onclick="showLeagueLeaders(currentFilter, 'goals', currentSortColumn === 'goals' && sortDirection === 'desc' ? 'asc' : 'desc')">M${arrow('goals')}</th>
+            <th onclick="showLeagueLeaders(currentFilter, 'goals', currentSortColumn === 'goals' && sortDirection === 'desc' ? 'asc' : 'desc')">G${arrow('goals')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'assists', currentSortColumn === 'assists' && sortDirection === 'desc' ? 'asc' : 'desc')">A${arrow('assists')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'points', currentSortColumn === 'points' && sortDirection === 'desc' ? 'asc' : 'desc')">P${arrow('points')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'pim', currentSortColumn === 'pim' && sortDirection === 'desc' ? 'asc' : 'desc')">PIM${arrow('pim')}</th>

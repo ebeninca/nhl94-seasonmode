@@ -3,10 +3,10 @@
 ## v006
 
 - [x] modal score/assists goalies
+- [x] goalies score simulation
 - [x] modal submit button on top
-- [] team selection in multiple columns
-- [] modal in view data mode
-- [] saves statistics for goalies
+- [] team selection in multiple columns, submit on top
+- [] saves statistics/simulation for goalies
 
 ## v005
 - [x] Exported file considers end of season status
@@ -37,6 +37,7 @@
 
 # Future
 
-- Allow building a tournament with fewer, selected teams
-- Improve team selection screen layout — more side by side, start button more accessible
-- Keep history in a file associated with the application without needing to import/export JSON
+- [] Store all data from each game allowing modal in view data mode
+- [] Allow building a tournament with fewer, selected teams
+- [] Improve team selection screen layout — more side by side, start button more accessible
+- [] Keep history in a file associated with the application without needing to import/export JSON

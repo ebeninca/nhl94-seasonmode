@@ -72,14 +72,26 @@ export function generatePlayerStats(teamName, goals) {
     });
 
     for (let i = 0; i < goals; i++) {
-        const scorer = scorerPool[Math.floor(Math.random() * scorerPool.length)];
+        // Extremely rare goalie goal (~0.02% chance per goal)
+        let scorer;
+        if (goalies.length > 0 && Math.random() < 0.0002) {
+            scorer = goalies[Math.floor(Math.random() * goalies.length)];
+        } else {
+            scorer = scorerPool[Math.floor(Math.random() * scorerPool.length)];
+        }
         playerStats[scorer].goals++;
 
         const assignedAssists = new Set();
         let potentialAssisters = assisterPool.filter(p => p !== scorer);
 
         if (potentialAssisters.length > 0 && Math.random() < 0.85) {
-            const firstAssister = potentialAssisters[Math.floor(Math.random() * potentialAssisters.length)];
+            // ~2% chance the assist goes to a goalie instead
+            let firstAssister;
+            if (goalies.length > 0 && Math.random() < 0.02) {
+                firstAssister = goalies[Math.floor(Math.random() * goalies.length)];
+            } else {
+                firstAssister = potentialAssisters[Math.floor(Math.random() * potentialAssisters.length)];
+            }
             if (firstAssister) {
                 playerStats[firstAssister].assists++;
                 assignedAssists.add(firstAssister);
