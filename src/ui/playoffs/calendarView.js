@@ -1,5 +1,5 @@
 import { state } from '../../state/gameState.js';
-import { abbr } from '../../data/teams.js';
+import { abbr, teamNameHtml } from '../../data/teams.js';
 import { getCalendarDates } from '../../engine/playoffs/playoffCalendar.js';
 
 export function renderPlayoffCalendarView() {
@@ -65,7 +65,7 @@ export function renderPlayoffCalendarView() {
 
         html += `<div class="${divClass}">`;
         html += `<div><strong>${roundName}</strong> — G${displayGameNum} | S: ${abbr(s.team1)} ${displayWins1}-${displayWins2} ${abbr(s.team2)}</div>`;
-        html += `<div><strong>${visitor}</strong> @ <strong>${home}</strong></div>`;
+        html += `<div>${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</div>`;
 
         if (entry.played) {
             const gameIndex = entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1;

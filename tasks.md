@@ -1,5 +1,11 @@
 # Tasks
 
+## v007
+- [x] team colors
+- [] create a view mode to modal submit screen
+    - [] save raw data on json
+    - [] click on finished game result opens the modal with data
+
 ## v006
 - [x] Goalie statistics simulation
     - [x] Based on statistics from hockeydb, identify in players.js which goalies were the starters for each team (most games played) in the 93-94 season
@@ -42,5 +48,4 @@
 
 - [] Store all data from each game allowing modal in view data mode
 - [] Allow building a tournament with fewer, selected teams
-- [] Improve team selection screen layout — more side by side, start button more accessible
 - [] Keep history in a file associated with the application without needing to import/export JSON

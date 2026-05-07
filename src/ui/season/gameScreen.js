@@ -2,6 +2,7 @@ import { state } from '../../state/gameState.js';
 import { simulateRealisticGame } from '../../engine/simulation.js';
 import { showModal, showPlayerStatsModal } from '../modal.js';
 import { showSeasonOverScreen } from '../navigation.js';
+import { teamNameHtml } from '../../data/teams.js';
 
 export function updateTeamInfo() {
     const teamInfo = document.getElementById('teamInfo');
@@ -47,12 +48,12 @@ export function showGamesToday() {
 
         if (game.played) {
             gameDiv.innerHTML = `
-                <div><strong>${game.visitor}</strong> @ <strong>${game.home}</strong></div>
+                <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
                 <div>Final: ${game.visitorScore} - ${game.homeScore}</div>
             `;
         } else if (isUserGame && !allMyGamesPlayed) {
             gameDiv.innerHTML = `
-                <div><strong>${game.visitor}</strong> @ <strong>${game.home}</strong></div>
+                <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
                 <div>
                     <input type="number" class="score-input" id="regular-visitor-${index}" min="0" max="20" placeholder="0">
                     -
@@ -63,7 +64,7 @@ export function showGamesToday() {
             `;
         } else {
             gameDiv.innerHTML = `
-                <div><strong>${game.visitor}</strong> @ <strong>${game.home}</strong></div>
+                <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
                 <div><em>Will be simulated</em></div>
             `;
         }

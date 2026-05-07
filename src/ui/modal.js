@@ -1,5 +1,6 @@
 import { players } from '../data/players.js';
 import { goalieStarters } from '../data/goalieStarters.js';
+import { teamNameHtml } from '../data/teams.js';
 import { state } from '../state/gameState.js';
 import { updateTeamStats, updatePlayerStatsForGame, updateGoalieStatsForGame } from '../engine/stats.js';
 import { simulateRealisticGame } from '../engine/simulation.js';
@@ -58,7 +59,7 @@ export function showPlayerStatsModal(game, userScore, opponentScore, userTeamNam
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
-            <h3>Game stats: ${game.visitor} @ ${game.home}</h3>
+            <h3>Game stats: ${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</h3>
             <div class="modal-buttons">
                 <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
                 <button class="btn" onclick="closeModal()">Cancel</button>
@@ -201,7 +202,7 @@ export function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
-            <h3>Game stats: ${visitor} @ ${home}</h3>
+            <h3>Game stats: ${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</h3>
             <div class="modal-buttons">
                 <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
                 <button class="btn" onclick="closeModal()">Cancel</button>

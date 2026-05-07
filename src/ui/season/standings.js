@@ -1,4 +1,4 @@
-import { teams } from '../../data/teams.js';
+import { teams, teamNameHtml } from '../../data/teams.js';
 import { state } from '../../state/gameState.js';
 import { hideAllScreens } from '../navigation.js';
 
@@ -43,7 +43,7 @@ export function showStandingsBy(filter) {
         const gp = s.wins + s.losses + s.ties;
         const gd = s.goalsFor - s.goalsAgainst;
         const cls = team === state.selectedTeam ? 'user-team-row' : '';
-        html += `<tr class="${cls}"><td>${index+1}</td><td>${team}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td></tr>`;
+        html += `<tr class="${cls}"><td>${index+1}</td><td>${teamNameHtml(team)}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td></tr>`;
     });
 
     html += `</tbody></table>`;
