@@ -38,6 +38,7 @@ export function selectTeam(teamName, cardElement) {
     document.querySelectorAll('.team-card').forEach(card => card.classList.remove('selected'));
     cardElement.classList.add('selected');
     document.getElementById('startSeason').disabled = false;
+    document.getElementById('startSeasonBottom').disabled = false;
 }
 
 export function startSeason() {

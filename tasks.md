@@ -1,7 +1,6 @@
 # Tasks
 
 ## v006
-
 - [x] Goalie statistics simulation
     - [x] Based on statistics from hockeydb, identify in players.js which goalies were the starters for each team (most games played) in the 93-94 season
     - [x] Add to the league leaders screen below the League, conference, etc. buttons, a row with buttons for skaters and goalies. On the goalies screen create columns for games played, goals against, shots against, save percentage (goals against divided by shots against). Do the same for the playoff stats screen. 
@@ -10,7 +9,7 @@
 - [x] modal score/assists goalies
 - [x] goalies score simulation
 - [x] modal submit button on top
-- [] team selection in multiple columns, submit on top
+- [x] team selection in multiple columns, submit on top
 
 ## v005
 - [x] Exported file considers end of season status
