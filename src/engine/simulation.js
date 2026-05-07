@@ -1,7 +1,8 @@
 import { teams } from '../data/teams.js';
 import { players } from '../data/players.js';
+import { goalieStarters } from '../data/goalieStarters.js';
 import { top50Goals, top50Assists, enforcers, allStars, eliteAllStars } from '../data/lists.js';
-import { updateTeamStats, updatePlayerStatsForGame } from './stats.js';
+import { updateTeamStats, updatePlayerStatsForGame, updateGoalieStatsForGame } from './stats.js';
 
 export function generatePlayerStats(teamName, goals) {
     const allPlayers = players[teamName].forwards.concat(players[teamName].defensemen).concat(players[teamName].goalies);
@@ -72,14 +73,26 @@ export function generatePlayerStats(teamName, goals) {
     });
 
     for (let i = 0; i < goals; i++) {
-        const scorer = scorerPool[Math.floor(Math.random() * scorerPool.length)];
+        // Extremely rare goalie goal (~0.02% chance per goal)
+        let scorer;
+        if (goalies.length > 0 && Math.random() < 0.0002) {
+            scorer = goalies[Math.floor(Math.random() * goalies.length)];
+        } else {
+            scorer = scorerPool[Math.floor(Math.random() * scorerPool.length)];
+        }
         playerStats[scorer].goals++;
 
         const assignedAssists = new Set();
         let potentialAssisters = assisterPool.filter(p => p !== scorer);
 
         if (potentialAssisters.length > 0 && Math.random() < 0.85) {
-            const firstAssister = potentialAssisters[Math.floor(Math.random() * potentialAssisters.length)];
+            // ~2% chance the assist goes to a goalie instead
+            let firstAssister;
+            if (goalies.length > 0 && Math.random() < 0.02) {
+                firstAssister = goalies[Math.floor(Math.random() * goalies.length)];
+            } else {
+                firstAssister = potentialAssisters[Math.floor(Math.random() * potentialAssisters.length)];
+            }
             if (firstAssister) {
                 playerStats[firstAssister].assists++;
                 assignedAssists.add(firstAssister);
@@ -118,6 +131,22 @@ export function generatePlayerStats(teamName, goals) {
     });
 
     return playerStats;
+}
+
+export function generateShotsAgainst(goalsScored) {
+    // Average NHL game ~28-32 shots per team. Generate realistic SA based on goals scored.
+    const baseSA = Math.floor(Math.random() * 10) + 25; // 25-34 shots
+    return Math.max(baseSA, goalsScored); // SA must be >= goals
+}
+
+export function pickGameGoalie(teamName) {
+    const goalies = players[teamName].goalies;
+    const starter = goalieStarters[teamName];
+    if (goalies.length <= 1) return starter;
+    // Backup plays ~25% of games (less than 50% relative to starter)
+    if (Math.random() < 0.75) return starter;
+    const backup = goalies.find(g => g.name !== starter);
+    return backup ? backup.name : starter;
 }
 
 export function simulateRealisticGame(game) {
@@ -181,6 +210,14 @@ export function simulateRealisticGame(game) {
     const homeStats = generatePlayerStats(game.home, game.homeScore);
     updatePlayerStatsForGame(game.visitor, visitorStats);
     updatePlayerStatsForGame(game.home, homeStats);
+
+    // Goalie stats: home goalie faces visitor shots, visitor goalie faces home shots
+    const homeSA = generateShotsAgainst(visitorGoals);
+    const visitorSA = generateShotsAgainst(homeGoals);
+    const homeGoalie = pickGameGoalie(game.home);
+    const visitorGoalie = pickGameGoalie(game.visitor);
+    updateGoalieStatsForGame(game.home, homeGoalie, visitorGoals, homeSA);
+    updateGoalieStatsForGame(game.visitor, visitorGoalie, homeGoals, visitorSA);
 }
 
 export function simulatePlayoffGame(series) {

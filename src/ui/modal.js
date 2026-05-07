@@ -1,9 +1,10 @@
 import { players } from '../data/players.js';
+import { goalieStarters } from '../data/goalieStarters.js';
 import { state } from '../state/gameState.js';
-import { updateTeamStats, updatePlayerStatsForGame } from '../engine/stats.js';
+import { updateTeamStats, updatePlayerStatsForGame, updateGoalieStatsForGame } from '../engine/stats.js';
 import { simulateRealisticGame } from '../engine/simulation.js';
 import { advancePlayoffSeries } from '../engine/playoffs/playoffEngine.js';
-import { updatePlayoffPlayerStats } from '../engine/playoffs/playoffStats.js';
+import { updatePlayoffPlayerStats, updatePlayoffGoalieStats } from '../engine/playoffs/playoffStats.js';
 import { showGamesToday, updateTeamInfo, updateNavigationButtons } from './season/gameScreen.js';
 import { renderPlayoffView } from './playoffs/playoffScreen.js';
 
@@ -42,33 +43,48 @@ export function closeModal(event) {
     }, 300);
 }
 
+function goalieInputHtml(teamName, prefix) {
+    const goalies = players[teamName].goalies;
+    let html = `<div id="${prefix}-goalieInputs" style="margin-top: 20px;"><h5>Goalies</h5>`;
+    goalies.forEach(g => {
+        html += `<div class="player-input-row"><span>${g.name} GA:</span><input type="number" id="${prefix}-ga-${g.name}" min="0" value="0"></div>`;
+        html += `<div class="player-input-row"><span>${g.name} SA:</span><input type="number" id="${prefix}-sa-${g.name}" min="0" value="0"></div>`;
+    });
+    html += `</div>`;
+    return html;
+}
+
 export function showPlayerStatsModal(game, userScore, opponentScore, userTeamName, opponentTeamName) {
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
             <h3>Game stats: ${game.visitor} @ ${game.home}</h3>
+            <div class="modal-buttons">
+                <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
+                <button class="btn" onclick="closeModal()">Cancel</button>
+            </div>
             <div style="display:flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${userTeamName}s stats</h4>
                     <p>Goal: ${userScore}</p>
                     <div id="userGoalInputs"></div>
+                    ${goalieInputHtml(userTeamName, 'user')}
                     <div id="userPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${opponentTeamName}s stats</h4>
                     <p>Goal: ${opponentScore}</p>
                     <div id="opponentGoalInputs"></div>
+                    ${goalieInputHtml(opponentTeamName, 'opponent')}
                     <div id="opponentPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
             </div>
-            <div class="modal-buttons">
-                <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
             </div>
         </div>
     `;
 
-    const userSkaters = players[userTeamName].forwards.concat(players[userTeamName].defensemen).map(p => p.name);
-    const oppSkaters = players[opponentTeamName].forwards.concat(players[opponentTeamName].defensemen).map(p => p.name);
+    const userSkaters = Object.values(players[userTeamName]).flat().map(p => p.name);
+    const oppSkaters = Object.values(players[opponentTeamName]).flat().map(p => p.name);
 
     const userGoalDiv = document.getElementById('userGoalInputs');
     const userPimDiv = document.getElementById('userPimInputs');
@@ -147,6 +163,18 @@ export function submitPlayerStatsFromModal(userScore, opponentScore, userTeamNam
         updateTeamStats(game.visitor, game.home, game.visitorScore, game.homeScore);
         updatePlayerStatsForGame(userTeamName, userPlayerStats);
         updatePlayerStatsForGame(opponentTeamName, opponentPlayerStats);
+
+        // Goalie stats from user input
+        players[userTeamName].goalies.forEach(g => {
+            const ga = parseInt(document.getElementById(`user-ga-${g.name}`)?.value) || 0;
+            const sa = parseInt(document.getElementById(`user-sa-${g.name}`)?.value) || 0;
+            if (ga > 0 || sa > 0) updateGoalieStatsForGame(userTeamName, g.name, ga, sa);
+        });
+        players[opponentTeamName].goalies.forEach(g => {
+            const ga = parseInt(document.getElementById(`opponent-ga-${g.name}`)?.value) || 0;
+            const sa = parseInt(document.getElementById(`opponent-sa-${g.name}`)?.value) || 0;
+            if (ga > 0 || sa > 0) updateGoalieStatsForGame(opponentTeamName, g.name, ga, sa);
+        });
     }
 
     closeModal();
@@ -174,26 +202,30 @@ export function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName
     modalContent.innerHTML = `
         <div class="player-stats-modal">
             <h3>Game stats: ${visitor} @ ${home}</h3>
+            <div class="modal-buttons">
+                <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
+                <button class="btn" onclick="closeModal()">Cancel</button>
+            </div>
             <div style="display:flex; justify-content: space-around; flex-wrap: wrap; gap: 20px;">
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${userTeamName} (${userScore})</h4>
                     <div id="playoff-userGoalInputs"></div>
+                    ${goalieInputHtml(userTeamName, 'pu-goalie')}
                     <div id="playoff-userPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
                 <div style="flex: 1; min-width: 250px;">
                     <h4>${oppTeamName} (${oppScore})</h4>
                     <div id="playoff-oppGoalInputs"></div>
+                    ${goalieInputHtml(oppTeamName, 'po-goalie')}
                     <div id="playoff-oppPimInputs" style="margin-top: 20px;"><h5>Penalty Minutes</h5></div>
                 </div>
             </div>
-            <div class="modal-buttons">
-                <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
             </div>
         </div>
     `;
 
-    const userSkaters = players[userTeamName].forwards.concat(players[userTeamName].defensemen).map(p => p.name);
-    const oppSkaters = players[oppTeamName].forwards.concat(players[oppTeamName].defensemen).map(p => p.name);
+    const userSkaters = Object.values(players[userTeamName]).flat().map(p => p.name);
+    const oppSkaters = Object.values(players[oppTeamName]).flat().map(p => p.name);
 
     const userGoalDiv = document.getElementById('playoff-userGoalInputs');
     const oppGoalDiv = document.getElementById('playoff-oppGoalInputs');
@@ -260,9 +292,21 @@ export function submitPlayoffPlayerStats(score1, score2, userTeamName, oppTeamNa
 
     const series = window._playoffCurrentSeries;
     window._playoffCurrentSeries = null;
-    advancePlayoffSeries(series, score1, score2);
+    advancePlayoffSeries(series, score1, score2, true);
     updatePlayoffPlayerStats(userTeamName, userStats);
     updatePlayoffPlayerStats(oppTeamName, oppStats);
+
+    // Goalie stats from user input for playoffs
+    players[userTeamName].goalies.forEach(g => {
+        const ga = parseInt(document.getElementById(`pu-goalie-ga-${g.name}`)?.value) || 0;
+        const sa = parseInt(document.getElementById(`pu-goalie-sa-${g.name}`)?.value) || 0;
+        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(userTeamName, { [g.name]: { gp: 1, ga, sa } });
+    });
+    players[oppTeamName].goalies.forEach(g => {
+        const ga = parseInt(document.getElementById(`po-goalie-ga-${g.name}`)?.value) || 0;
+        const sa = parseInt(document.getElementById(`po-goalie-sa-${g.name}`)?.value) || 0;
+        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(oppTeamName, { [g.name]: { gp: 1, ga, sa } });
+    });
 
     closeModal();
     if (window._playoffStatsCallback) {

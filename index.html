@@ -32,10 +32,14 @@
                 <p>1993-94 NHL Season</p>
             </div>
             
+            <div style="text-align: center; margin-bottom: 20px;">
+                <button class="btn" id="startSeason" onclick="startSeason()" disabled>Start Season</button>
+            </div>
+            
             <div class="team-selection" id="teamGrid"></div>
             
             <div style="text-align: center;">
-                <button class="btn" id="startSeason" onclick="startSeason()" disabled>Start Season</button>
+                <button class="btn" id="startSeasonBottom" onclick="startSeason()" disabled>Start Season</button>
             </div>
         </div>
     </div>
@@ -98,6 +102,11 @@
                 <button id="filter-central" onclick="showLeagueLeaders('central')">Central</button>
                 <button id="filter-pacific" onclick="showLeagueLeaders('pacific')">Pacific</button>
                 <button id="filter-team" onclick="showLeagueLeaders('team')">Your Team</button>
+            </div>
+
+            <div class="leader-view-toggle" style="display:flex; gap:10px; justify-content:center; margin-bottom:20px;">
+                <button id="view-skaters" class="btn active" onclick="switchLeaderView('skaters')">Skaters</button>
+                <button id="view-goalies" class="btn" onclick="switchLeaderView('goalies')">Goalies</button>
             </div>
             
             <div id="playerStatsTable"></div>

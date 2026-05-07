@@ -1,5 +1,6 @@
 import { teams } from '../data/teams.js';
 import { players } from '../data/players.js';
+import { goalieStarters } from '../data/goalieStarters.js';
 import { state } from '../state/gameState.js';
 
 export function initializeTeamStats() {
@@ -11,11 +12,15 @@ export function initializeTeamStats() {
         state.teamStats[team] = {
             wins: 0, losses: 0, ties: 0,
             goalsFor: 0, goalsAgainst: 0, points: 0,
-            playerStats: {}
+            playerStats: {},
+            goalieStats: {}
         };
         if (players[team]) {
             Object.values(players[team]).flat().forEach(player => {
                 state.teamStats[team].playerStats[player.name] = { goals: 0, assists: 0, points: 0, pim: 0, gp: 0 };
+            });
+            players[team].goalies.forEach(g => {
+                state.teamStats[team].goalieStats[g.name] = { gp: 0, ga: 0, sa: 0 };
             });
         }
     });
@@ -56,4 +61,14 @@ export function updatePlayerStatsForGame(teamName, playerStats) {
             state.teamStats[teamName].playerStats[player].pim += playerStats[player].pim;
         }
     });
+}
+
+export function updateGoalieStatsForGame(teamName, goalieName, ga, sa) {
+    if (!state.teamStats[teamName].goalieStats) state.teamStats[teamName].goalieStats = {};
+    if (!state.teamStats[teamName].goalieStats[goalieName]) {
+        state.teamStats[teamName].goalieStats[goalieName] = { gp: 0, ga: 0, sa: 0 };
+    }
+    state.teamStats[teamName].goalieStats[goalieName].gp++;
+    state.teamStats[teamName].goalieStats[goalieName].ga += ga;
+    state.teamStats[teamName].goalieStats[goalieName].sa += sa;
 }
