@@ -10,7 +10,7 @@
 - [x] modal score/assists goalies
 - [x] goalies score simulation
 - [x] modal submit button on top
-- [] team selection in multiple columns, submit on top
+- [x] team selection in multiple columns, submit on top
 
 ## v005
 - [x] Exported file considers end of season status
