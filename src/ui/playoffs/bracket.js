@@ -1,5 +1,5 @@
 import { state } from '../../state/gameState.js';
-import { abbr } from '../../data/teams.js';
+import { abbr, teamColors } from '../../data/teams.js';
 
 export function renderPlayoffBracket() {
     if (!state.playoffState) return;
@@ -65,9 +65,12 @@ function renderSeriesCard(series) {
     const t1cls = series.winner === series.team1 ? 'team bracket-team winner' : (series.winner ? 'team bracket-team eliminated' : 'team bracket-team');
     const t2cls = series.winner === series.team2 ? 'team bracket-team winner' : (series.winner ? 'team bracket-team eliminated' : 'team bracket-team');
 
+    const c1 = teamColors[series.team1] || ['#333','#555'];
+    const c2 = teamColors[series.team2] || ['#333','#555'];
+
     return `<div class="${cls}">
-        <div class="${t1cls}">${abbr(series.team1)}</div>
+        <div class="${t1cls}"><span style="background:linear-gradient(135deg,${c1[0]},${c1[1]});color:white;padding:2px 6px;border-radius:3px;">${abbr(series.team1)}</span></div>
         <div class="series-score">${series.wins1} - ${series.wins2}</div>
-        <div class="${t2cls}">${abbr(series.team2)}</div>
+        <div class="${t2cls}"><span style="background:linear-gradient(135deg,${c2[0]},${c2[1]});color:white;padding:2px 6px;border-radius:3px;">${abbr(series.team2)}</span></div>
     </div>`;
 }

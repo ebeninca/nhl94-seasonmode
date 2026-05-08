@@ -1,4 +1,4 @@
-import { teams } from '../../data/teams.js';
+import { teams, teamColors } from '../../data/teams.js';
 import { state } from '../../state/gameState.js';
 import { initializeTeamStats } from '../../engine/stats.js';
 import { initializeSchedule } from '../../engine/schedule.js';
@@ -21,12 +21,14 @@ export function renderTeamSelection() {
     const teamGrid = document.getElementById('teamGrid');
     teamGrid.innerHTML = '';
     Object.keys(teams).forEach(teamName => {
+        const colors = teamColors[teamName];
         const teamCard = document.createElement('div');
         teamCard.className = 'team-card';
+        teamCard.style.background = `linear-gradient(135deg, ${colors[0]}, ${colors[1]})`;
         teamCard.innerHTML = `
-            <h3>${teamName}</h3>
-            <p>${teams[teamName].division} Division</p>
-            <p>${teams[teamName].conference} Conference</p>
+            <h3 style="color:white;">${teamName}</h3>
+            <p style="color:rgba(255,255,255,0.8);">${teams[teamName].division} Division</p>
+            <p style="color:rgba(255,255,255,0.8);">${teams[teamName].conference} Conference</p>
         `;
         teamCard.onclick = () => selectTeam(teamName, teamCard);
         teamGrid.appendChild(teamCard);

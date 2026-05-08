@@ -211,11 +211,23 @@ export function simulateRealisticGame(game) {
     updatePlayerStatsForGame(game.visitor, visitorStats);
     updatePlayerStatsForGame(game.home, homeStats);
 
-    // Goalie stats: home goalie faces visitor shots, visitor goalie faces home shots
+    // Store raw game data (only players with non-zero stats)
     const homeSA = generateShotsAgainst(visitorGoals);
     const visitorSA = generateShotsAgainst(homeGoals);
     const homeGoalie = pickGameGoalie(game.home);
     const visitorGoalie = pickGameGoalie(game.visitor);
+    const filterStats = (stats) => {
+        const filtered = {};
+        for (const [name, s] of Object.entries(stats)) {
+            if (s.goals || s.assists || s.pim) filtered[name] = s;
+        }
+        return filtered;
+    };
+    game.rawStats = {
+        visitor: { playerStats: filterStats(visitorStats), goalie: visitorGoalie, goalsAgainst: homeGoals, shotsAgainst: visitorSA },
+        home: { playerStats: filterStats(homeStats), goalie: homeGoalie, goalsAgainst: visitorGoals, shotsAgainst: homeSA }
+    };
+
     updateGoalieStatsForGame(game.home, homeGoalie, visitorGoals, homeSA);
     updateGoalieStatsForGame(game.visitor, visitorGoalie, homeGoals, visitorSA);
 }

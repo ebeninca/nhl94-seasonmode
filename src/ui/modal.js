@@ -1,5 +1,6 @@
 import { players } from '../data/players.js';
 import { goalieStarters } from '../data/goalieStarters.js';
+import { teamNameHtml } from '../data/teams.js';
 import { state } from '../state/gameState.js';
 import { updateTeamStats, updatePlayerStatsForGame, updateGoalieStatsForGame } from '../engine/stats.js';
 import { simulateRealisticGame } from '../engine/simulation.js';
@@ -47,8 +48,8 @@ function goalieInputHtml(teamName, prefix) {
     const goalies = players[teamName].goalies;
     let html = `<div id="${prefix}-goalieInputs" style="margin-top: 20px;"><h5>Goalies</h5>`;
     goalies.forEach(g => {
-        html += `<div class="player-input-row"><span>${g.name} GA:</span><input type="number" id="${prefix}-ga-${g.name}" min="0" value="0"></div>`;
-        html += `<div class="player-input-row"><span>${g.name} SA:</span><input type="number" id="${prefix}-sa-${g.name}" min="0" value="0"></div>`;
+        html += `<div class="player-input-row"><span>${g.name} Goals Against:</span><input type="number" id="${prefix}-ga-${g.name}" min="0" value="0"></div>`;
+        html += `<div class="player-input-row"><span>${g.name} Shots Against:</span><input type="number" id="${prefix}-sa-${g.name}" min="0" value="0"></div>`;
     });
     html += `</div>`;
     return html;
@@ -58,7 +59,7 @@ export function showPlayerStatsModal(game, userScore, opponentScore, userTeamNam
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
-            <h3>Game stats: ${game.visitor} @ ${game.home}</h3>
+            <h3>Game stats: ${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</h3>
             <div class="modal-buttons">
                 <button class="btn" onclick="submitPlayerStatsFromModal(${userScore}, ${opponentScore}, '${userTeamName}', '${opponentTeamName}', '${game.visitor}', '${game.home}', 'regular')">Submit</button>
                 <button class="btn" onclick="closeModal()">Cancel</button>
@@ -165,16 +166,38 @@ export function submitPlayerStatsFromModal(userScore, opponentScore, userTeamNam
         updatePlayerStatsForGame(opponentTeamName, opponentPlayerStats);
 
         // Goalie stats from user input
+        const userGoalieRaw = {};
         players[userTeamName].goalies.forEach(g => {
             const ga = parseInt(document.getElementById(`user-ga-${g.name}`)?.value) || 0;
             const sa = parseInt(document.getElementById(`user-sa-${g.name}`)?.value) || 0;
-            if (ga > 0 || sa > 0) updateGoalieStatsForGame(userTeamName, g.name, ga, sa);
+            if (ga > 0 || sa > 0) {
+                updateGoalieStatsForGame(userTeamName, g.name, ga, sa);
+                userGoalieRaw[g.name] = { ga, sa };
+            }
         });
+        const oppGoalieRaw = {};
         players[opponentTeamName].goalies.forEach(g => {
             const ga = parseInt(document.getElementById(`opponent-ga-${g.name}`)?.value) || 0;
             const sa = parseInt(document.getElementById(`opponent-sa-${g.name}`)?.value) || 0;
-            if (ga > 0 || sa > 0) updateGoalieStatsForGame(opponentTeamName, g.name, ga, sa);
+            if (ga > 0 || sa > 0) {
+                updateGoalieStatsForGame(opponentTeamName, g.name, ga, sa);
+                oppGoalieRaw[g.name] = { ga, sa };
+            }
         });
+
+        // Store raw game data
+        const filterStats = (stats) => {
+            const filtered = {};
+            for (const [name, s] of Object.entries(stats)) {
+                if (s.goals || s.assists || s.pim) filtered[name] = s;
+            }
+            return filtered;
+        };
+        const visitorIsUser = game.visitor === userTeamName;
+        game.rawStats = {
+            visitor: { playerStats: filterStats(visitorIsUser ? userPlayerStats : opponentPlayerStats), goalies: visitorIsUser ? userGoalieRaw : oppGoalieRaw },
+            home: { playerStats: filterStats(visitorIsUser ? opponentPlayerStats : userPlayerStats), goalies: visitorIsUser ? oppGoalieRaw : userGoalieRaw }
+        };
     }
 
     closeModal();
@@ -201,7 +224,7 @@ export function showPlayoffPlayerStatsModal(series, score1, score2, userTeamName
     const modalContent = document.getElementById('modalContent');
     modalContent.innerHTML = `
         <div class="player-stats-modal">
-            <h3>Game stats: ${visitor} @ ${home}</h3>
+            <h3>Game stats: ${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</h3>
             <div class="modal-buttons">
                 <button class="btn" onclick="submitPlayoffPlayerStats(${score1}, ${score2}, '${userTeamName}', '${oppTeamName}', '${t1}', '${t2}')">Submit</button>
                 <button class="btn" onclick="closeModal()">Cancel</button>
@@ -297,16 +320,39 @@ export function submitPlayoffPlayerStats(score1, score2, userTeamName, oppTeamNa
     updatePlayoffPlayerStats(oppTeamName, oppStats);
 
     // Goalie stats from user input for playoffs
+    const userGoalieRaw = {};
     players[userTeamName].goalies.forEach(g => {
         const ga = parseInt(document.getElementById(`pu-goalie-ga-${g.name}`)?.value) || 0;
         const sa = parseInt(document.getElementById(`pu-goalie-sa-${g.name}`)?.value) || 0;
-        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(userTeamName, { [g.name]: { gp: 1, ga, sa } });
+        if (ga > 0 || sa > 0) {
+            updatePlayoffGoalieStats(userTeamName, { [g.name]: { gp: 1, ga, sa } });
+            userGoalieRaw[g.name] = { ga, sa };
+        }
     });
+    const oppGoalieRaw = {};
     players[oppTeamName].goalies.forEach(g => {
         const ga = parseInt(document.getElementById(`po-goalie-ga-${g.name}`)?.value) || 0;
         const sa = parseInt(document.getElementById(`po-goalie-sa-${g.name}`)?.value) || 0;
-        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(oppTeamName, { [g.name]: { gp: 1, ga, sa } });
+        if (ga > 0 || sa > 0) {
+            updatePlayoffGoalieStats(oppTeamName, { [g.name]: { gp: 1, ga, sa } });
+            oppGoalieRaw[g.name] = { ga, sa };
+        }
     });
+
+    // Store raw stats in the last game entry of the series
+    const filterStats = (stats) => {
+        const filtered = {};
+        for (const [name, s] of Object.entries(stats)) {
+            if (s.goals || s.assists || s.pim) filtered[name] = s;
+        }
+        return filtered;
+    };
+    const lastGame = series.games[series.games.length - 1];
+    const isUserTeam1 = userTeamName === series.team1;
+    lastGame.rawStats = {
+        team1: { playerStats: filterStats(isUserTeam1 ? userStats : oppStats), goalies: isUserTeam1 ? userGoalieRaw : oppGoalieRaw },
+        team2: { playerStats: filterStats(isUserTeam1 ? oppStats : userStats), goalies: isUserTeam1 ? oppGoalieRaw : userGoalieRaw }
+    };
 
     closeModal();
     if (window._playoffStatsCallback) {

@@ -1,7 +1,16 @@
 # Tasks
 
-## v006
+## v007
+- [x] team colors
+- [x] create a view mode to modal submit screen
+    - [x] save raw data on json
+    - [x] click on finished game result opens the modal with data
+- [x] SA is confusing, Shots Against or Saves? Shots Agains
+- [x] Playoffs counting of series standings is behind for simulated series 
+- [x] View final regular season calendar results  
+    - [x] button for access from season over screen 
 
+## v006
 - [x] Goalie statistics simulation
     - [x] Based on statistics from hockeydb, identify in players.js which goalies were the starters for each team (most games played) in the 93-94 season
     - [x] Add to the league leaders screen below the League, conference, etc. buttons, a row with buttons for skaters and goalies. On the goalies screen create columns for games played, goals against, shots against, save percentage (goals against divided by shots against). Do the same for the playoff stats screen. 
@@ -41,7 +50,5 @@
 
 # Future
 
-- [] Store all data from each game allowing modal in view data mode
 - [] Allow building a tournament with fewer, selected teams
-- [] Improve team selection screen layout — more side by side, start button more accessible
 - [] Keep history in a file associated with the application without needing to import/export JSON

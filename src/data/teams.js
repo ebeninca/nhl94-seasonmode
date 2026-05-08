@@ -42,4 +42,39 @@ export const teamAbbr = {
     'San Jose Sharks': 'SJS', 'Vancouver Canucks': 'VAN'
 };
 
+export const teamColors = {
+    'Boston Bruins': ['#000000', '#FFB81C'],
+    'Buffalo Sabres': ['#002654', '#FFB81C'],
+    'Hartford Whalers': ['#00703C', '#002868'],
+    'Montreal Canadiens': ['#AF1E2D', '#192168'],
+    'Ottawa Senators': ['#000000', '#C52032'],
+    'Pittsburgh Penguins': ['#000000', '#FCB514'],
+    'Quebec Nordiques': ['#002868', '#C8102E'],
+    'New Jersey Devils': ['#CE1126', '#000000'],
+    'New York Islanders': ['#003087', '#FC4C02'],
+    'New York Rangers': ['#0038A8', '#CE1126'],
+    'Philadelphia Flyers': ['#F74902', '#000000'],
+    'Florida Panthers': ['#041E42', '#C8102E'],
+    'Tampa Bay Lightning': ['#002868', '#000000'],
+    'Washington Capitals': ['#002868', '#C8102E'],
+    'Chicago Blackhawks': ['#CF0A2C', '#000000'],
+    'Dallas Stars': ['#006847', '#000000'],
+    'Detroit Red Wings': ['#CE1126', '#cac9c9'],
+    'St. Louis Blues': ['#002F87', '#FCB514'],
+    'Toronto Maple Leafs': ['#003E7E', '#cac9c9'],
+    'Winnipeg Jets': ['#002868', '#C8102E'],
+    'Calgary Flames': ['#CE1126', '#F1BE48'],
+    'Edmonton Oilers': ['#041E42', '#FF4C00'],
+    'Los Angeles Kings': ['#111111', '#A2AAAD'],
+    'Mighty Ducks of Anaheim': ['#6F2DA8', '#007A5E'],
+    'San Jose Sharks': ['#006D75', '#000000'],
+    'Vancouver Canucks': ['#002244', '#FFB81C']
+};
+
+export function teamNameHtml(team) {
+    const colors = teamColors[team];
+    if (!colors) return team;
+    return `<span style="background:linear-gradient(135deg, ${colors[0]}, ${colors[1]}); color:white; padding:2px 6px; border-radius:3px; font-weight:bold;">${team}</span>`;
+}
+
 export function abbr(team) { return teamAbbr[team] || team; }
