@@ -2,9 +2,9 @@
 
 ## v007
 - [x] team colors
-- [] create a view mode to modal submit screen
-    - [] save raw data on json
-    - [] click on finished game result opens the modal with data
+- [x] create a view mode to modal submit screen
+    - [x] save raw data on json
+    - [x] click on finished game result opens the modal with data
 
 ## v006
 - [x] Goalie statistics simulation

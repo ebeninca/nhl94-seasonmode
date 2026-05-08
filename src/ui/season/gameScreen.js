@@ -47,10 +47,12 @@ export function showGamesToday() {
         if (isUserGame) gameDiv.classList.add('user-game');
 
         if (game.played) {
+            gameDiv.classList.add('played');
             gameDiv.innerHTML = `
                 <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
                 <div>Final: ${game.visitorScore} - ${game.homeScore}</div>
             `;
+            gameDiv.onclick = () => showGameRawStats(game);
         } else if (isUserGame && !allMyGamesPlayed) {
             gameDiv.innerHTML = `
                 <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
@@ -163,4 +165,62 @@ export function simulateMyGame(visitor, home) {
         updateTeamInfo();
         updateNavigationButtons();
     }
+}
+
+export function showGameRawStats(game) {
+    if (!game.rawStats) {
+        const modal = document.getElementById('modal');
+        document.getElementById('modalContent').innerHTML = `
+            <p>No detailed stats available for this game.</p>
+            <div class="modal-buttons"><button class="btn" onclick="closeModal()">Close</button></div>
+        `;
+        modal.classList.add('show');
+        return;
+    }
+
+    const raw = game.rawStats;
+    const renderPlayerStats = (stats) => {
+        if (!stats || Object.keys(stats).length === 0) return '<p style="color:#999;">No scoring</p>';
+        let html = '<table style="width:100%; font-size:0.85em;"><tr><th style="text-align:left;">Player</th><th>G</th><th>A</th><th>PIM</th></tr>';
+        for (const [name, s] of Object.entries(stats)) {
+            html += `<tr><td>${name}</td><td style="text-align:center;">${s.goals || 0}</td><td style="text-align:center;">${s.assists || 0}</td><td style="text-align:center;">${s.pim || 0}</td></tr>`;
+        }
+        html += '</table>';
+        return html;
+    };
+
+    const renderGoalieStats = (side) => {
+        if (side.goalie) {
+            return `<p><strong>Goalie:</strong> ${side.goalie} — GA: ${side.goalsAgainst}, SA: ${side.shotsAgainst}</p>`;
+        }
+        if (side.goalies && Object.keys(side.goalies).length > 0) {
+            let html = '';
+            for (const [name, s] of Object.entries(side.goalies)) {
+                html += `<p><strong>${name}:</strong> GA: ${s.ga}, SA: ${s.sa}</p>`;
+            }
+            return html;
+        }
+        return '';
+    };
+
+    const modalContent = document.getElementById('modalContent');
+    modalContent.innerHTML = `
+        <div class="player-stats-modal">
+            <h3>Game stats: ${teamNameHtml(game.visitor)} ${game.visitorScore} - ${game.homeScore} ${teamNameHtml(game.home)}</h3>
+            <div class="modal-buttons"><button class="btn" disabled>Submit</button><button class="btn" onclick="closeModal()">Close</button></div>
+            <div style="display:flex; justify-content:space-around; flex-wrap:wrap; gap:20px; margin-top:15px;">
+                <div style="flex:1; min-width:250px;">
+                    <h4>${game.visitor}</h4>
+                    ${renderPlayerStats(raw.visitor.playerStats)}
+                    ${renderGoalieStats(raw.visitor)}
+                </div>
+                <div style="flex:1; min-width:250px;">
+                    <h4>${game.home}</h4>
+                    ${renderPlayerStats(raw.home.playerStats)}
+                    ${renderGoalieStats(raw.home)}
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('modal').classList.add('show');
 }

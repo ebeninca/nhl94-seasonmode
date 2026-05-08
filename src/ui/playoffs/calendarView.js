@@ -63,14 +63,22 @@ export function renderPlayoffCalendarView() {
         const displayWins1   = entry.snapshot ? entry.snapshot.wins1   : s.wins1;
         const displayWins2   = entry.snapshot ? entry.snapshot.wins2   : s.wins2;
 
-        html += `<div class="${divClass}">`;
+        const gameIndex = entry.played ? (entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1) : -1;
+        if (entry.played) {
+            html += `<div class="${divClass} played" onclick="showPlayoffGameRawStats('${s.team1}','${s.team2}',${gameIndex})">`;
+        } else {
+            html += `<div class="${divClass}">`;
+        }
         html += `<div><strong>${roundName}</strong> — G${displayGameNum} | S: ${abbr(s.team1)} ${displayWins1}-${displayWins2} ${abbr(s.team2)}</div>`;
         html += `<div>${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</div>`;
 
         if (entry.played) {
-            const gameIndex = entry.gameNum < s.games.length ? entry.gameNum : s.games.length - 1;
             const last = s.games[gameIndex];
-            if (last) html += `<div>Final: ${last.score1} - ${last.score2}</div>`;
+            if (last) {
+                const visitorScore = team1IsHome ? last.score2 : last.score1;
+                const homeScore = team1IsHome ? last.score1 : last.score2;
+                html += `<div>Final: ${visitorScore} - ${homeScore}</div>`;
+            }
             if (s.winner && entry.gameNum === s.games.length - 1) html += `<div style="color:#4CAF50; margin-top:4px;">W: ${abbr(s.winner)}</div>`;
         } else if (isUser) {
             html += `<div style="margin-top:8px;">

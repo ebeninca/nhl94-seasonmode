@@ -166,16 +166,38 @@ export function submitPlayerStatsFromModal(userScore, opponentScore, userTeamNam
         updatePlayerStatsForGame(opponentTeamName, opponentPlayerStats);
 
         // Goalie stats from user input
+        const userGoalieRaw = {};
         players[userTeamName].goalies.forEach(g => {
             const ga = parseInt(document.getElementById(`user-ga-${g.name}`)?.value) || 0;
             const sa = parseInt(document.getElementById(`user-sa-${g.name}`)?.value) || 0;
-            if (ga > 0 || sa > 0) updateGoalieStatsForGame(userTeamName, g.name, ga, sa);
+            if (ga > 0 || sa > 0) {
+                updateGoalieStatsForGame(userTeamName, g.name, ga, sa);
+                userGoalieRaw[g.name] = { ga, sa };
+            }
         });
+        const oppGoalieRaw = {};
         players[opponentTeamName].goalies.forEach(g => {
             const ga = parseInt(document.getElementById(`opponent-ga-${g.name}`)?.value) || 0;
             const sa = parseInt(document.getElementById(`opponent-sa-${g.name}`)?.value) || 0;
-            if (ga > 0 || sa > 0) updateGoalieStatsForGame(opponentTeamName, g.name, ga, sa);
+            if (ga > 0 || sa > 0) {
+                updateGoalieStatsForGame(opponentTeamName, g.name, ga, sa);
+                oppGoalieRaw[g.name] = { ga, sa };
+            }
         });
+
+        // Store raw game data
+        const filterStats = (stats) => {
+            const filtered = {};
+            for (const [name, s] of Object.entries(stats)) {
+                if (s.goals || s.assists || s.pim) filtered[name] = s;
+            }
+            return filtered;
+        };
+        const visitorIsUser = game.visitor === userTeamName;
+        game.rawStats = {
+            visitor: { playerStats: filterStats(visitorIsUser ? userPlayerStats : opponentPlayerStats), goalies: visitorIsUser ? userGoalieRaw : oppGoalieRaw },
+            home: { playerStats: filterStats(visitorIsUser ? opponentPlayerStats : userPlayerStats), goalies: visitorIsUser ? oppGoalieRaw : userGoalieRaw }
+        };
     }
 
     closeModal();
@@ -298,16 +320,39 @@ export function submitPlayoffPlayerStats(score1, score2, userTeamName, oppTeamNa
     updatePlayoffPlayerStats(oppTeamName, oppStats);
 
     // Goalie stats from user input for playoffs
+    const userGoalieRaw = {};
     players[userTeamName].goalies.forEach(g => {
         const ga = parseInt(document.getElementById(`pu-goalie-ga-${g.name}`)?.value) || 0;
         const sa = parseInt(document.getElementById(`pu-goalie-sa-${g.name}`)?.value) || 0;
-        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(userTeamName, { [g.name]: { gp: 1, ga, sa } });
+        if (ga > 0 || sa > 0) {
+            updatePlayoffGoalieStats(userTeamName, { [g.name]: { gp: 1, ga, sa } });
+            userGoalieRaw[g.name] = { ga, sa };
+        }
     });
+    const oppGoalieRaw = {};
     players[oppTeamName].goalies.forEach(g => {
         const ga = parseInt(document.getElementById(`po-goalie-ga-${g.name}`)?.value) || 0;
         const sa = parseInt(document.getElementById(`po-goalie-sa-${g.name}`)?.value) || 0;
-        if (ga > 0 || sa > 0) updatePlayoffGoalieStats(oppTeamName, { [g.name]: { gp: 1, ga, sa } });
+        if (ga > 0 || sa > 0) {
+            updatePlayoffGoalieStats(oppTeamName, { [g.name]: { gp: 1, ga, sa } });
+            oppGoalieRaw[g.name] = { ga, sa };
+        }
     });
+
+    // Store raw stats in the last game entry of the series
+    const filterStats = (stats) => {
+        const filtered = {};
+        for (const [name, s] of Object.entries(stats)) {
+            if (s.goals || s.assists || s.pim) filtered[name] = s;
+        }
+        return filtered;
+    };
+    const lastGame = series.games[series.games.length - 1];
+    const isUserTeam1 = userTeamName === series.team1;
+    lastGame.rawStats = {
+        team1: { playerStats: filterStats(isUserTeam1 ? userStats : oppStats), goalies: isUserTeam1 ? userGoalieRaw : oppGoalieRaw },
+        team2: { playerStats: filterStats(isUserTeam1 ? oppStats : userStats), goalies: isUserTeam1 ? oppGoalieRaw : userGoalieRaw }
+    };
 
     closeModal();
     if (window._playoffStatsCallback) {

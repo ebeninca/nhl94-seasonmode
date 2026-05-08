@@ -65,8 +65,7 @@ export function initPlayoffs() {
 }
 
 export function advancePlayoffSeries(series, score1, score2, skipSimStats = false) {
-    series.games.push({ score1, score2 });
-    if (score1 > score2) series.wins1++; else series.wins2++;
+    const gameEntry = { score1, score2 };
 
     if (!skipSimStats) {
         const stats1 = generatePlayerStats(series.team1, score1);
@@ -80,7 +79,22 @@ export function advancePlayoffSeries(series, score1, score2, skipSimStats = fals
         const sa2 = generateShotsAgainst(score1);
         updatePlayoffGoalieStats(series.team1, { [goalie1]: { gp: 1, ga: score2, sa: sa1 } });
         updatePlayoffGoalieStats(series.team2, { [goalie2]: { gp: 1, ga: score1, sa: sa2 } });
+
+        const filterStats = (stats) => {
+            const filtered = {};
+            for (const [name, s] of Object.entries(stats)) {
+                if (s.goals || s.assists || s.pim) filtered[name] = s;
+            }
+            return filtered;
+        };
+        gameEntry.rawStats = {
+            team1: { playerStats: filterStats(stats1), goalie: goalie1, goalsAgainst: score2, shotsAgainst: sa1 },
+            team2: { playerStats: filterStats(stats2), goalie: goalie2, goalsAgainst: score1, shotsAgainst: sa2 }
+        };
     }
+
+    series.games.push(gameEntry);
+    if (score1 > score2) series.wins1++; else series.wins2++;
 
     if (series.wins1 === 4) series.winner = series.team1;
     else if (series.wins2 === 4) series.winner = series.team2;
