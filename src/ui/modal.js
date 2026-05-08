@@ -48,8 +48,8 @@ function goalieInputHtml(teamName, prefix) {
     const goalies = players[teamName].goalies;
     let html = `<div id="${prefix}-goalieInputs" style="margin-top: 20px;"><h5>Goalies</h5>`;
     goalies.forEach(g => {
-        html += `<div class="player-input-row"><span>${g.name} GA:</span><input type="number" id="${prefix}-ga-${g.name}" min="0" value="0"></div>`;
-        html += `<div class="player-input-row"><span>${g.name} SA:</span><input type="number" id="${prefix}-sa-${g.name}" min="0" value="0"></div>`;
+        html += `<div class="player-input-row"><span>${g.name} Goals Against:</span><input type="number" id="${prefix}-ga-${g.name}" min="0" value="0"></div>`;
+        html += `<div class="player-input-row"><span>${g.name} Shots Against:</span><input type="number" id="${prefix}-sa-${g.name}" min="0" value="0"></div>`;
     });
     html += `</div>`;
     return html;

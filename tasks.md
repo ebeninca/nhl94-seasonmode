@@ -5,6 +5,9 @@
 - [x] create a view mode to modal submit screen
     - [x] save raw data on json
     - [x] click on finished game result opens the modal with data
+- [x] SA is confusing, Shots Against or Saves? Shots Agains
+- [x] Playoffs counting of series standings is behind for simulated series 
+- [] Permitir ver resultados da temporada durante os playoffs  
 
 ## v006
 - [x] Goalie statistics simulation
@@ -46,6 +49,5 @@
 
 # Future
 
-- [] Store all data from each game allowing modal in view data mode
 - [] Allow building a tournament with fewer, selected teams
 - [] Keep history in a file associated with the application without needing to import/export JSON

@@ -183,7 +183,7 @@ export function showGameRawStats(game) {
         if (!stats || Object.keys(stats).length === 0) return '<p style="color:#999;">No scoring</p>';
         let html = '<table style="width:100%; font-size:0.85em;"><tr><th style="text-align:left;">Player</th><th>G</th><th>A</th><th>PIM</th></tr>';
         for (const [name, s] of Object.entries(stats)) {
-            html += `<tr><td>${name}</td><td style="text-align:center;">${s.goals || 0}</td><td style="text-align:center;">${s.assists || 0}</td><td style="text-align:center;">${s.pim || 0}</td></tr>`;
+            html += `<tr><td style="text-align:left;">${name}</td><td style="text-align:center;">${s.goals || 0}</td><td style="text-align:center;">${s.assists || 0}</td><td style="text-align:center;">${s.pim || 0}</td></tr>`;
         }
         html += '</table>';
         return html;

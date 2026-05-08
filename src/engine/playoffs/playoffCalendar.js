@@ -126,8 +126,8 @@ export function simulatePlayoffCalendarGame(idx, team1, team2) {
         : entries[idx];
     if (!entry) return;
     const { score1, score2 } = simulatePlayoffGame(entry.series);
-    entry.snapshot = { gameNum: entry.gameNum, wins1: entry.series.wins1, wins2: entry.series.wins2 };
     advancePlayoffSeries(entry.series, score1, score2);
+    entry.snapshot = { gameNum: entry.gameNum, wins1: entry.series.wins1, wins2: entry.series.wins2 };
     entry.played = true;
     simulateRemainingCalendarGamesToday();
     checkAndAdvancePlayoffRound();
@@ -140,8 +140,8 @@ export function simulateRemainingCalendarGamesToday() {
         if (!e.played && !e.series.winner &&
             e.series.team1 !== state.selectedTeam && e.series.team2 !== state.selectedTeam) {
             const { score1, score2 } = simulatePlayoffGame(e.series);
-            e.snapshot = { gameNum: e.gameNum, wins1: e.series.wins1, wins2: e.series.wins2 };
             advancePlayoffSeries(e.series, score1, score2);
+            e.snapshot = { gameNum: e.gameNum, wins1: e.series.wins1, wins2: e.series.wins2 };
             e.played = true;
         }
     });
