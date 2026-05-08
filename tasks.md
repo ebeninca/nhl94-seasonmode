@@ -7,7 +7,8 @@
     - [x] click on finished game result opens the modal with data
 - [x] SA is confusing, Shots Against or Saves? Shots Agains
 - [x] Playoffs counting of series standings is behind for simulated series 
-- [] Permitir ver resultados da temporada durante os playoffs  
+- [x] View final regular season calendar results  
+    - [x] button for access from season over screen 
 
 ## v006
 - [x] Goalie statistics simulation

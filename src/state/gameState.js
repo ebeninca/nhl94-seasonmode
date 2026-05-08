@@ -4,6 +4,7 @@ export const state = {
     teamStats: {},
     allGames: [],
     seasonOver: false,
+    viewOnly: false,
     playoffState: null,
     playoffView: 'calendar',
     playoffCurrentDate: null,

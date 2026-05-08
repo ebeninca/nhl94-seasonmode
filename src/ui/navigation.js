@@ -29,6 +29,7 @@ export function showSeasonOverScreen() {
 export function backToGame() {
     if (window._backToSeasonOver) {
         window._backToSeasonOver = false;
+        state.viewOnly = false;
         showSeasonOverScreen();
     } else {
         hideAllScreens();
@@ -37,5 +38,11 @@ export function backToGame() {
 }
 
 export function backToMainMenuOrSeasonOver() {
-    showMainMenu();
+    state.viewOnly = false;
+    if (window._backToSeasonOver) {
+        window._backToSeasonOver = false;
+        showSeasonOverScreen();
+    } else {
+        showMainMenu();
+    }
 }

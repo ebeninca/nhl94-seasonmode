@@ -53,7 +53,7 @@ export function showGamesToday() {
                 <div>Final: ${game.visitorScore} - ${game.homeScore}</div>
             `;
             gameDiv.onclick = () => showGameRawStats(game);
-        } else if (isUserGame && !allMyGamesPlayed) {
+        } else if (!state.viewOnly && isUserGame && !allMyGamesPlayed) {
             gameDiv.innerHTML = `
                 <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
                 <div>
@@ -67,7 +67,7 @@ export function showGamesToday() {
         } else {
             gameDiv.innerHTML = `
                 <div>${teamNameHtml(game.visitor)} @ ${teamNameHtml(game.home)}</div>
-                <div><em>Will be simulated</em></div>
+                <div><em>${state.viewOnly ? 'Not played' : 'Will be simulated'}</em></div>
             `;
         }
         container.appendChild(gameDiv);
@@ -140,6 +140,22 @@ export function nextDate() {
 export function updateNavigationButtons() {
     const prevBtn = document.getElementById('prevDateBtn');
     const nextBtn = document.getElementById('nextDateBtn');
+
+    if (state.viewOnly) {
+        nextBtn.disabled = false;
+        const firstGameDate = state.allGames[0].date;
+        prevBtn.disabled = state.currentDate.getTime() <= firstGameDate.getTime();
+        // Hide action buttons in view-only mode
+        document.querySelectorAll('#gameScreen .main-panel > div:first-child .btn').forEach(btn => {
+            if (btn !== prevBtn && btn !== nextBtn) btn.style.display = 'none';
+        });
+        return;
+    }
+
+    // Show all buttons in normal mode
+    document.querySelectorAll('#gameScreen .main-panel > div:first-child .btn').forEach(btn => {
+        btn.style.display = '';
+    });
 
     const userGameToday = state.allGames.find(g =>
         g.date.toDateString() === state.currentDate.toDateString() &&
