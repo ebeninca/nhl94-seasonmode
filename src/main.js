@@ -27,6 +27,7 @@ import { initPlayoffs } from './engine/playoffs/playoffEngine.js';
 import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './engine/playoffs/playoffCalendar.js';
 import { sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView } from './engine/playoffs/playoffStats.js';
 import { showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow } from './ui/playoffs/playoffScreen.js';
+import { showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD } from './ui/playoffs/playoffTeamData.js';
 
 // showNewGame needs initializeNewGame, wired here to avoid circular deps
 function showNewGame() {
@@ -127,7 +128,8 @@ Object.assign(window, {
     playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame,
     showPlayoffLeaders, sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView,
     showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar,
-    showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData
+    showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData,
+    showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD
 });
 
 // On load

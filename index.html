@@ -182,6 +182,7 @@
                 <button class="btn" id="btnViewCalendar" onclick="switchPlayoffView('calendar')">Calendar</button>
                 <button class="btn" id="btnViewBracket" onclick="switchPlayoffView('bracket')">Bracket</button>
                 <button class="btn" onclick="showPlayoffLeaders()">Playoff Stats</button>
+                <button class="btn" onclick="showPlayoffTeamData()">Team Data</button>
                 <button class="btn" onclick="saveGame()">Save Game</button>
                 <button class="btn" onclick="exportSave()">Export Save</button>
             </div>
@@ -196,6 +197,21 @@
             <button class="back-button" onclick="showPlayoffScreen()">← Back to Bracket</button>
             <div class="header"><h1>Playoff Leaders</h1></div>
             <div id="playoffStatsTable"></div>
+        </div>
+    </div>
+
+    <!-- Playoff Team Data Screen -->
+    <div id="playoffTeamDataScreen" class="screen">
+        <div class="container">
+            <button class="back-button" onclick="showPlayoffScreen()">← Back to Playoffs</button>
+            <div class="header">
+                <h1>Playoff Team Data</h1>
+            </div>
+            <div style="display:flex; gap:10px; margin-bottom:20px; justify-content:center;">
+                <button class="btn" id="playoffTeamDataGamesTab" onclick="switchPlayoffTeamDataTab('games')">Games</button>
+                <button class="btn" id="playoffTeamDataStatsTab" onclick="switchPlayoffTeamDataTab('stats')">Player Stats</button>
+            </div>
+            <div id="playoffTeamDataContent"></div>
         </div>
     </div>
 
