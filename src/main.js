@@ -24,8 +24,8 @@ import { saveGame, exportSave, triggerImport, importSave, continueGame, checkSav
 
 // Playoffs
 import { initPlayoffs } from './engine/playoffs/playoffEngine.js';
-import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './engine/playoffs/playoffCalendar.js';
-import { sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView } from './engine/playoffs/playoffStats.js';
+import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './ui/playoffs/playoffCalendarHandlers.js';
+import { sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView } from './ui/playoffs/playoffLeadersView.js';
 import { showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow } from './ui/playoffs/playoffScreen.js';
 import { showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD } from './ui/playoffs/playoffTeamData.js';
 

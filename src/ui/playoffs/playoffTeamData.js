@@ -51,10 +51,17 @@ function renderPlayoffTeamGames(container) {
     const team = state.selectedTeam;
     const roundNames = ['First Round', 'Conf. Semifinals', 'Conf. Finals', 'Stanley Cup Final'];
     const homeGames = [0, 1, 4, 6];
+    const calendar = state.playoffState.calendar;
+
+    // Helper to find date for a specific series + gameNum from calendar
+    function getGameDate(series, gameNum) {
+        const entry = calendar.find(e => e.series === series && e.gameNum === gameNum);
+        return entry ? entry.date : null;
+    }
 
     let html = `<h3 style="text-align:center; margin-bottom:10px;">${team} Playoff Game Log</h3>
         <table class="player-stats-table"><thead><tr>
-            <th>#</th><th>Round</th><th></th><th>Opponent</th><th>GF</th><th>GA</th><th>Result</th><th>Series</th>
+            <th>#</th><th>Date</th><th>Round</th><th></th><th>Opponent</th><th>GF</th><th>GA</th><th>Result</th><th>Series</th>
         </tr></thead><tbody>`;
 
     let gameNum = 0;
@@ -73,6 +80,8 @@ function renderPlayoffTeamGames(container) {
             const atVs = isHome ? 'vs' : '@';
             const gf = isTeam1 ? g.score1 : g.score2;
             const ga = isTeam1 ? g.score2 : g.score1;
+            const date = getGameDate(series, gi);
+            const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
 
             let result;
             if (gf > ga) { result = 'W'; seriesWins++; }
@@ -82,6 +91,7 @@ function renderPlayoffTeamGames(container) {
 
             html += `<tr>
                 <td style="text-align:center;">${gameNum}</td>
+                <td>${dateStr}</td>
                 <td>${roundNames[ri]}</td>
                 <td style="text-align:center;">${atVs}</td>
                 <td>${opponent}</td>
@@ -100,8 +110,11 @@ function renderPlayoffTeamGames(container) {
                 const team1IsHome = homeGames.includes(gi);
                 const isHome = isTeam1 ? team1IsHome : !team1IsHome;
                 const atVs = isHome ? 'vs' : '@';
+                const date = getGameDate(series, gi);
+                const dateStr = date ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
                 html += `<tr>
                     <td style="text-align:center;">${gameNum}</td>
+                    <td>${dateStr}</td>
                     <td>${roundNames[ri]}</td>
                     <td style="text-align:center;">${atVs}</td>
                     <td>${opponent}</td>
