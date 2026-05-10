@@ -8,7 +8,7 @@ let teamDataSortDir = 'desc';
 export function showTeamData() {
     hideAllScreens();
     document.getElementById('teamDataScreen').classList.add('active');
-    switchTeamDataTab('stats');
+    switchTeamDataTab('games');
 }
 
 export function switchTeamDataTab(tab) {
@@ -16,7 +16,7 @@ export function switchTeamDataTab(tab) {
     document.getElementById('teamDataStatsTab').classList.toggle('active', tab === 'stats');
     const content = document.getElementById('teamDataContent');
     if (tab === 'games') {
-        content.innerHTML = '<p style="text-align:center; color:#ccc;">Coming soon.</p>';
+        renderTeamGames();
     } else {
         teamDataStatsView = 'skaters';
         teamDataSortCol = 'points';
@@ -105,5 +105,88 @@ function renderTeamPlayerStats() {
         });
         html += `</tbody></table>`;
     }
+    container.innerHTML = html;
+}
+
+function renderTeamGames() {
+    if (!state.selectedTeam) return;
+    const container = document.getElementById('teamDataContent');
+    const team = state.selectedTeam;
+
+    const teamGames = state.allGames
+        .filter(g => g.visitor === team || g.home === team)
+        .sort((a, b) => a.date - b.date);
+
+    if (teamGames.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:#ccc;">No games scheduled.</p>';
+        return;
+    }
+
+    let wins = 0, losses = 0, ties = 0;
+    let streakType = '';
+    let streakCount = 0;
+
+    let html = `<h3 style="text-align:center; margin-bottom:10px;">${team} Game Log</h3>
+        <table class="player-stats-table"><thead><tr>
+            <th>#</th><th>Date</th><th></th><th>Opponent</th><th>GF</th><th>GA</th><th>Result</th><th>W-L-T</th><th>Streak</th><th>Pct</th>
+        </tr></thead><tbody>`;
+
+    teamGames.forEach((g, i) => {
+        const isHome = g.home === team;
+        const opponent = isHome ? g.visitor : g.home;
+        const atVs = isHome ? 'vs' : '@';
+        const dateStr = g.date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        if (!g.played) {
+            html += `<tr>
+                <td style="text-align:center;">${i+1}</td>
+                <td>${dateStr}</td>
+                <td style="text-align:center;">${atVs}</td>
+                <td>${opponent}</td>
+                <td></td><td></td><td></td><td></td><td></td><td></td>
+            </tr>`;
+            return;
+        }
+
+        const gf = isHome ? g.homeScore : g.visitorScore;
+        const ga = isHome ? g.visitorScore : g.homeScore;
+
+        let result;
+        if (gf > ga) { result = 'W'; wins++; }
+        else if (gf < ga) { result = 'L'; losses++; }
+        else { result = 'T'; ties++; }
+
+        if (result === 'T') {
+            // Ties don't break streak but don't extend it either
+        } else if (result === streakType) {
+            streakCount++;
+        } else {
+            streakType = result;
+            streakCount = 1;
+        }
+        const streak = streakCount > 0 ? `${streakType}${streakCount}` : '-';
+
+        const pointsEarned = wins * 2 + ties;
+        const gamesPlayed = wins + losses + ties;
+        const pointsPossible = gamesPlayed * 2;
+        const pct = pointsPossible > 0 ? (pointsEarned / pointsPossible).toFixed(3) : '-';
+
+        const resultClass = result === 'W' ? 'color:#4CAF50;' : result === 'L' ? 'color:#e53935;' : 'color:#FFB81C;';
+
+        html += `<tr>
+            <td style="text-align:center;">${i+1}</td>
+            <td>${dateStr}</td>
+            <td style="text-align:center;">${atVs}</td>
+            <td>${opponent}</td>
+            <td style="text-align:center;">${gf}</td>
+            <td style="text-align:center;">${ga}</td>
+            <td style="text-align:center; font-weight:bold; ${resultClass}">${result}</td>
+            <td style="text-align:center;">${wins}-${losses}-${ties}</td>
+            <td style="text-align:center;">${streak}</td>
+            <td style="text-align:center;">${pct}</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table>`;
     container.innerHTML = html;
 }

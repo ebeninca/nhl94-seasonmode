@@ -1,9 +1,10 @@
 # Tasks
 
 ## v008
-- [] Botão Team Data na tela de calendario da temporada, dentro da tela:
-    - [] Aba Games - mostra lista de todos os jogos do jogador, ordenado por data, colunas: (Data, . (at or vs), 
-    Oponente, Gols, Gols Oponente, Result (win/loss), W-L-T, Streak, Pct pontos aproveitados (Pontos ganhos/disputados))
+- [x] Botão Team Data na tela de calendario da temporada, dentro da tela:
+    - [x] Aba Games - tabela que mostra lista de todos os jogos da temporada regular do time do usuario, ordenado por
+    data, colunas: (Data, . (at or vs), Oponente, Gols, Gols Oponente, Result (win or loss), W-L-T, Streak (Acumulated 
+    X Losses or X Wins), Pct (pontos aproveitados = Pontos ganhos/disputados))
     - [x] Aba Player stats - mover a tela Your team do Botão league leaders para cá
 - [x] Numerar classificacoes de players (rank)
 
