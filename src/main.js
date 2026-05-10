@@ -14,6 +14,7 @@ import { showGamesToday, updateTeamInfo, updateCurrentDate, updateNavigationButt
 // Standings & Leaders
 import { showStandings, showStandingsBy } from './ui/season/standings.js';
 import { showLeagueLeaders, renderLeagueLeaders, switchLeaderView } from './ui/season/leagueLeaders.js';
+import { showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData } from './ui/season/teamData.js';
 
 // Modal
 import { showModal, closeModal, showPlayerStatsModal, submitPlayerStatsFromModal, showPlayoffPlayerStatsModal, submitPlayoffPlayerStats } from './ui/modal.js';
@@ -57,6 +58,8 @@ function viewSeasonCalendar() {
     showGamesToday();
     updateNavigationButtons();
 }
+
+
 
 // Expose state fields needed by inline onclick in leagueLeaders table headers
 Object.defineProperty(window, 'currentFilter', { get: () => state.currentFilter });
@@ -123,7 +126,8 @@ Object.assign(window, {
     initPlayoffs: initPlayoffsAndShow, continuePlayoffs, showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow,
     playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame,
     showPlayoffLeaders, sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView,
-    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar
+    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar,
+    showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData
 });
 
 // On load

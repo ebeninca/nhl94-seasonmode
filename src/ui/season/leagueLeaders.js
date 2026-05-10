@@ -80,6 +80,7 @@ function renderSkaterLeaders(filter) {
 
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="player-stats-table"><thead><tr>
+            <th>#</th>
             <th>Player</th><th>Team</th>
             <th onclick="showLeagueLeaders(currentFilter, 'gp', currentSortColumn === 'gp' && sortDirection === 'desc' ? 'asc' : 'desc')">GP${arrow('gp')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'goals', currentSortColumn === 'goals' && sortDirection === 'desc' ? 'asc' : 'desc')">G${arrow('goals')}</th>
@@ -88,8 +89,10 @@ function renderSkaterLeaders(filter) {
             <th onclick="showLeagueLeaders(currentFilter, 'pim', currentSortColumn === 'pim' && sortDirection === 'desc' ? 'asc' : 'desc')">PIM${arrow('pim')}</th>
         </tr></thead><tbody>`;
 
-    allPlayers.forEach(p => {
-        html += `<tr><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.points}</td><td>${p.pim}</td></tr>`;
+    const highlightTeam = filter !== 'team';
+    allPlayers.forEach((p, i) => {
+        const cls = highlightTeam && p.team === state.selectedTeam ? 'user-team-row' : '';
+        html += `<tr class="${cls}"><td>${i+1}</td><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.points}</td><td>${p.pim}</td></tr>`;
     });
     html += `</tbody></table>`;
     document.getElementById('playerStatsTable').innerHTML = html;
@@ -123,6 +126,7 @@ function renderGoalieLeaders(filter) {
 
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="player-stats-table"><thead><tr>
+            <th>#</th>
             <th>Goalie</th><th>Team</th>
             <th onclick="showLeagueLeaders(currentFilter, 'gp', currentSortColumn === 'gp' && sortDirection === 'desc' ? 'asc' : 'desc')">GP${arrow('gp')}</th>
             <th onclick="showLeagueLeaders(currentFilter, 'ga', currentSortColumn === 'ga' && sortDirection === 'desc' ? 'asc' : 'desc')">GA${arrow('ga')}</th>
@@ -130,8 +134,10 @@ function renderGoalieLeaders(filter) {
             <th onclick="showLeagueLeaders(currentFilter, 'svPct', currentSortColumn === 'svPct' && sortDirection === 'desc' ? 'asc' : 'desc')">SV%${arrow('svPct')}</th>
         </tr></thead><tbody>`;
 
-    allGoalies.forEach(p => {
-        html += `<tr><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.ga}</td><td>${p.sa}</td><td>${p.svPct.toFixed(3)}</td></tr>`;
+    const highlightTeam = filter !== 'team';
+    allGoalies.forEach((p, i) => {
+        const cls = highlightTeam && p.team === state.selectedTeam ? 'user-team-row' : '';
+        html += `<tr class="${cls}"><td>${i+1}</td><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.ga}</td><td>${p.sa}</td><td>${p.svPct.toFixed(3)}</td></tr>`;
     });
     html += `</tbody></table>`;
     document.getElementById('playerStatsTable').innerHTML = html;

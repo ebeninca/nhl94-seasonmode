@@ -64,7 +64,7 @@ export const teamColors = {
     'Toronto Maple Leafs': ['#003E7E', '#cac9c9'],
     'Winnipeg Jets': ['#002868', '#C8102E'],
     'Calgary Flames': ['#CE1126', '#F1BE48'],
-    'Edmonton Oilers': ['#041E42', '#FF4C00'],
+    'Edmonton Oilers': ['#07255c', '#FF4C00'],
     'Los Angeles Kings': ['#111111', '#A2AAAD'],
     'Mighty Ducks of Anaheim': ['#6F2DA8', '#007A5E'],
     'San Jose Sharks': ['#006D75', '#000000'],

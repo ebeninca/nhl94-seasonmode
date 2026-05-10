@@ -95,6 +95,7 @@ function renderPlayoffSkaterTable() {
 
     let html = `<h3 style="text-align:center; margin-bottom:20px;">Playoff Leaders</h3>
         <table class="player-stats-table"><thead><tr>
+            <th>#</th>
             <th>Player</th><th>Team</th>
             <th onclick="sortPlayoffLeaders('gp')" style="cursor:pointer;">GP${arrow('gp')}</th>
             <th onclick="sortPlayoffLeaders('goals')" style="cursor:pointer;">G${arrow('goals')}</th>
@@ -102,8 +103,9 @@ function renderPlayoffSkaterTable() {
             <th onclick="sortPlayoffLeaders('points')" style="cursor:pointer;">P${arrow('points')}</th>
             <th onclick="sortPlayoffLeaders('pim')" style="cursor:pointer;">PIM${arrow('pim')}</th>
         </tr></thead><tbody>`;
-    allPlayers.forEach(p => {
-        html += `<tr><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.points}</td><td>${p.pim}</td></tr>`;
+    allPlayers.forEach((p, i) => {
+        const cls = p.team === state.selectedTeam ? 'user-team-row' : '';
+        html += `<tr class="${cls}"><td>${i+1}</td><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.goals}</td><td>${p.assists}</td><td>${p.points}</td><td>${p.pim}</td></tr>`;
     });
     html += `</tbody></table>`;
     return html;
@@ -134,14 +136,16 @@ function renderPlayoffGoalieTable() {
 
     let html = `<h3 style="text-align:center; margin-bottom:20px;">Playoff Goalie Leaders</h3>
         <table class="player-stats-table"><thead><tr>
+            <th>#</th>
             <th>Goalie</th><th>Team</th>
             <th onclick="sortPlayoffLeaders('gp')" style="cursor:pointer;">GP${arrow('gp')}</th>
             <th onclick="sortPlayoffLeaders('ga')" style="cursor:pointer;">GA${arrow('ga')}</th>
             <th onclick="sortPlayoffLeaders('sa')" style="cursor:pointer;">SA${arrow('sa')}</th>
             <th onclick="sortPlayoffLeaders('svPct')" style="cursor:pointer;">SV%${arrow('svPct')}</th>
         </tr></thead><tbody>`;
-    allGoalies.forEach(p => {
-        html += `<tr><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.ga}</td><td>${p.sa}</td><td>${p.svPct.toFixed(3)}</td></tr>`;
+    allGoalies.forEach((p, i) => {
+        const cls = p.team === state.selectedTeam ? 'user-team-row' : '';
+        html += `<tr class="${cls}"><td>${i+1}</td><td>${p.player}</td><td>${p.team}</td><td>${p.gp}</td><td>${p.ga}</td><td>${p.sa}</td><td>${p.svPct.toFixed(3)}</td></tr>`;
     });
     html += `</tbody></table>`;
     return html;
