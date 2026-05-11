@@ -77,9 +77,24 @@ export function showStandingsBy(filter) {
 
     const indicators = getClinchIndicators();
 
+    // Calculate home/away records and points pct from games
+    const records = {};
+    teamsToShow.forEach(team => {
+        let homeW = 0, homeL = 0, homeT = 0, awayW = 0, awayL = 0, awayT = 0;
+        state.allGames.filter(g => g.played && (g.home === team || g.visitor === team)).forEach(g => {
+            const isHome = g.home === team;
+            const gf = isHome ? g.homeScore : g.visitorScore;
+            const ga = isHome ? g.visitorScore : g.homeScore;
+            if (gf > ga) { isHome ? homeW++ : awayW++; }
+            else if (gf < ga) { isHome ? homeL++ : awayL++; }
+            else { isHome ? homeT++ : awayT++; }
+        });
+        records[team] = { homeW, homeL, homeT, awayW, awayL, awayT };
+    });
+
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="standings-table"><thead><tr>
-            <th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th>
+            <th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th><th>Pct</th><th>Home</th><th>Away</th>
         </tr></thead><tbody>`;
 
     teamsToShow.forEach((team, index) => {
@@ -88,7 +103,11 @@ export function showStandingsBy(filter) {
         const gd = s.goalsFor - s.goalsAgainst;
         const cls = team === state.selectedTeam ? 'user-team-row' : '';
         const ind = indicators[team] ? ` <span style="color:#FFD700; font-weight:bold;">${indicators[team]}</span>` : '';
-        html += `<tr class="${cls}"><td>${index+1}</td><td>${teamNameHtml(team)}${ind}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td></tr>`;
+        const pct = gp > 0 ? (s.points / (gp * 2)).toFixed(4) : '.0000';
+        const r = records[team];
+        const home = `${r.homeW}-${r.homeL}-${r.homeT}`;
+        const away = `${r.awayW}-${r.awayL}-${r.awayT}`;
+        html += `<tr class="${cls}"><td>${index+1}</td><td>${teamNameHtml(team)}${ind}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td><td>${pct}</td><td>${home}</td><td>${away}</td></tr>`;
     });
 
     html += `</tbody></table>
