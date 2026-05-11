@@ -2,6 +2,48 @@ import { teams, teamNameHtml } from '../../data/teams.js';
 import { state } from '../../state/gameState.js';
 import { hideAllScreens } from '../navigation.js';
 
+function getStandingsSorted(teamList) {
+    return [...teamList].sort((a, b) => {
+        const aS = state.teamStats[a], bS = state.teamStats[b];
+        if (bS.points !== aS.points) return bS.points - aS.points;
+        if (bS.wins !== aS.wins) return bS.wins - aS.wins;
+        return (bS.goalsFor - bS.goalsAgainst) - (aS.goalsFor - aS.goalsAgainst);
+    });
+}
+
+function getClinchIndicators() {
+    const indicators = {};
+    const divisions = ['Northeast', 'Atlantic', 'Central', 'Pacific'];
+
+    // Division leaders and playoff qualifiers (top 4 per division)
+    const divLeaders = {};
+    divisions.forEach(div => {
+        const divTeams = Object.keys(teams).filter(t => teams[t].division === div);
+        const sorted = getStandingsSorted(divTeams);
+        const top4 = sorted.slice(0, 4);
+        top4.forEach(t => { indicators[t] = (indicators[t] || '') + 'x'; });
+        divLeaders[div] = sorted[0];
+        indicators[sorted[0]] = 'y'; // clinched division (overrides x)
+    });
+
+    // Conference leaders
+    ['Eastern', 'Western'].forEach(conf => {
+        const confTeams = Object.keys(teams).filter(t => teams[t].conference === conf);
+        const sorted = getStandingsSorted(confTeams);
+        if (sorted[0]) {
+            indicators[sorted[0]] = 'z'; // clinched conference (overrides y)
+        }
+    });
+
+    // Presidents' Trophy: best record in the league
+    const allSorted = getStandingsSorted(Object.keys(teams));
+    if (allSorted[0]) {
+        indicators[allSorted[0]] = 'p'; // overrides all
+    }
+
+    return indicators;
+}
+
 export function showStandings() {
     hideAllScreens();
     document.getElementById('standingsScreen').classList.add('active');
@@ -33,9 +75,26 @@ export function showStandingsBy(filter) {
         return (bS.goalsFor - bS.goalsAgainst) - (aS.goalsFor - aS.goalsAgainst);
     });
 
+    const indicators = getClinchIndicators();
+
+    // Calculate home/away records and points pct from games
+    const records = {};
+    teamsToShow.forEach(team => {
+        let homeW = 0, homeL = 0, homeT = 0, awayW = 0, awayL = 0, awayT = 0;
+        state.allGames.filter(g => g.played && (g.home === team || g.visitor === team)).forEach(g => {
+            const isHome = g.home === team;
+            const gf = isHome ? g.homeScore : g.visitorScore;
+            const ga = isHome ? g.visitorScore : g.homeScore;
+            if (gf > ga) { isHome ? homeW++ : awayW++; }
+            else if (gf < ga) { isHome ? homeL++ : awayL++; }
+            else { isHome ? homeT++ : awayT++; }
+        });
+        records[team] = { homeW, homeL, homeT, awayW, awayL, awayT };
+    });
+
     let html = `<h3 style="text-align: center; margin-bottom: 20px;">${title}</h3>
         <table class="standings-table"><thead><tr>
-            <th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th>
+            <th>Rank</th><th>Team</th><th>GP</th><th>W</th><th>L</th><th>T</th><th>PTS</th><th>GF</th><th>GA</th><th>+/-</th><th>Pct</th><th>Home</th><th>Away</th>
         </tr></thead><tbody>`;
 
     teamsToShow.forEach((team, index) => {
@@ -43,9 +102,17 @@ export function showStandingsBy(filter) {
         const gp = s.wins + s.losses + s.ties;
         const gd = s.goalsFor - s.goalsAgainst;
         const cls = team === state.selectedTeam ? 'user-team-row' : '';
-        html += `<tr class="${cls}"><td>${index+1}</td><td>${teamNameHtml(team)}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td></tr>`;
+        const ind = indicators[team] ? ` <span style="color:#FFD700; font-weight:bold;">${indicators[team]}</span>` : '';
+        const pct = gp > 0 ? (s.points / (gp * 2)).toFixed(4) : '.0000';
+        const r = records[team];
+        const home = `${r.homeW}-${r.homeL}-${r.homeT}`;
+        const away = `${r.awayW}-${r.awayL}-${r.awayT}`;
+        html += `<tr class="${cls}"><td>${index+1}</td><td>${teamNameHtml(team)}${ind}</td><td>${gp}</td><td>${s.wins}</td><td>${s.losses}</td><td>${s.ties}</td><td>${s.points}</td><td>${s.goalsFor}</td><td>${s.goalsAgainst}</td><td>${gd >= 0 ? '+' : ''}${gd}</td><td>${pct}</td><td>${home}</td><td>${away}</td></tr>`;
     });
 
-    html += `</tbody></table>`;
+    html += `</tbody></table>
+    <div style="margin-top:15px; font-size:0.85em; color:#ccc; text-align:center;">
+        <strong>p</strong> - Presidents' Trophy &nbsp;|&nbsp; <strong>z</strong> - Clinched Conference &nbsp;|&nbsp; <strong>y</strong> - Clinched Division &nbsp;|&nbsp; <strong>x</strong> - Clinched Playoff Spot
+    </div>`;
     document.getElementById('standingsTable').innerHTML = html;
 }

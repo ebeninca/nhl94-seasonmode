@@ -1,5 +1,18 @@
 # Tasks
 
+## v009
+- [x] Top 4 teams of each division qualyfies for the playoffs
+- [x] Subtitles for p/z/y/x (Presidents' Trophy, Clinched Conference/Division and Playoff spot) 
+- [x] New columns on standings (pct, home and away W-L-T)
+- [x] Show Team Data at the end of the season
+
+## v008
+- [x] Team Data button on the season calendar screen, inside the screen: 
+    - [x] Games tab - table showing all regular season games for the user's team, sorted by date, columns: (Date, @/vs, Opponent, Goals For, Goals Against, Result (win or loss), W-L-T, Streak (accumulated X Losses or X Wins), Pct (points percentage = Points earned / Points possible)) 
+    - [x] Player Stats tab - moved the "Your Team" view from League Leaders button to here
+- [x] Rank column on player/goalie leaderboards
+- [x] Team Data button for playoffs (next to Playoff Stats) following the same logic as regular season, updating the game list as playoff rounds advance
+
 ## v007
 - [x] team colors
 - [x] create a view mode to modal submit screen
@@ -12,7 +25,8 @@
 
 ## v006
 - [x] Goalie statistics simulation
-    - [x] Based on statistics from hockeydb, identify in players.js which goalies were the starters for each team (most games played) in the 93-94 season
+    - [x] Based on statistics from hockeydb, identify in players.js which goalies were the starters for each team 
+    (most games played) in the 93-94 season
     - [x] Add to the league leaders screen below the League, conference, etc. buttons, a row with buttons for skaters and goalies. On the goalies screen create columns for games played, goals against, shots against, save percentage (goals against divided by shots against). Do the same for the playoff stats screen. 
     - [x] With that, generate goals against per game simulation for each goalie, also considering backups in fewer games, populating the data for the screen described above and saving this data to file.
     - [x] Consequently, add to the result submission screen a "goalies" section, just above penalty minutes, where I can enter for each team's goalie two values: goals against and shots against.

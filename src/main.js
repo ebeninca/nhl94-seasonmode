@@ -14,6 +14,7 @@ import { showGamesToday, updateTeamInfo, updateCurrentDate, updateNavigationButt
 // Standings & Leaders
 import { showStandings, showStandingsBy } from './ui/season/standings.js';
 import { showLeagueLeaders, renderLeagueLeaders, switchLeaderView } from './ui/season/leagueLeaders.js';
+import { showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData } from './ui/season/teamData.js';
 
 // Modal
 import { showModal, closeModal, showPlayerStatsModal, submitPlayerStatsFromModal, showPlayoffPlayerStatsModal, submitPlayoffPlayerStats } from './ui/modal.js';
@@ -23,9 +24,10 @@ import { saveGame, exportSave, triggerImport, importSave, continueGame, checkSav
 
 // Playoffs
 import { initPlayoffs } from './engine/playoffs/playoffEngine.js';
-import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './engine/playoffs/playoffCalendar.js';
-import { sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView } from './engine/playoffs/playoffStats.js';
+import { playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame } from './ui/playoffs/playoffCalendarHandlers.js';
+import { sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView } from './ui/playoffs/playoffLeadersView.js';
 import { showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow } from './ui/playoffs/playoffScreen.js';
+import { showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD } from './ui/playoffs/playoffTeamData.js';
 
 // showNewGame needs initializeNewGame, wired here to avoid circular deps
 function showNewGame() {
@@ -57,6 +59,14 @@ function viewSeasonCalendar() {
     showGamesToday();
     updateNavigationButtons();
 }
+
+function backToSeasonCalendar() {
+    hideAllScreens();
+    document.getElementById('gameScreen').classList.add('active');
+    updateNavigationButtons();
+}
+
+
 
 // Expose state fields needed by inline onclick in leagueLeaders table headers
 Object.defineProperty(window, 'currentFilter', { get: () => state.currentFilter });
@@ -123,7 +133,9 @@ Object.assign(window, {
     initPlayoffs: initPlayoffsAndShow, continuePlayoffs, showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow,
     playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame,
     showPlayoffLeaders, sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView,
-    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar
+    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar, backToSeasonCalendar,
+    showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData,
+    showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD
 });
 
 // On load

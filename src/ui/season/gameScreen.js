@@ -145,9 +145,12 @@ export function updateNavigationButtons() {
         nextBtn.disabled = false;
         const firstGameDate = state.allGames[0].date;
         prevBtn.disabled = state.currentDate.getTime() <= firstGameDate.getTime();
-        // Hide action buttons in view-only mode
+        const teamDataBtn = document.getElementById('teamDataBtn');
+        // Hide action buttons in view-only mode, except navigation and Team Data
         document.querySelectorAll('#gameScreen .main-panel > div:first-child .btn').forEach(btn => {
-            if (btn !== prevBtn && btn !== nextBtn) btn.style.display = 'none';
+            if (btn !== prevBtn && btn !== nextBtn && btn !== teamDataBtn) {
+                btn.style.display = 'none';
+            }
         });
         return;
     }

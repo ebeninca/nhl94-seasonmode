@@ -44,7 +44,7 @@ export function renderPlayoffCalendarView() {
         html += `<p style="text-align:center; color:#ccc;">No games scheduled today.</p>`;
     }
 
-    const roundNames = ['FR', 'CSF', 'CF', 'SCF'];
+    const roundNames = ['DR1', 'DSF', 'CF', 'SCF'];
 
     shownEntries.forEach((entry, idx) => {
         const s = entry.series;
@@ -70,7 +70,7 @@ export function renderPlayoffCalendarView() {
             html += `<div class="${divClass}">`;
         }
         html += `<div><strong>${roundName}</strong> — G${displayGameNum} | S: ${abbr(s.team1)} ${displayWins1}-${displayWins2} ${abbr(s.team2)}</div>`;
-        html += `<div>${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</div>`;
+        html += `<div style="flex:1; text-align:left;">${teamNameHtml(visitor)} @ ${teamNameHtml(home)}</div>`;
 
         if (entry.played) {
             const last = s.games[gameIndex];
