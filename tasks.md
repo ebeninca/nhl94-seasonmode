@@ -1,5 +1,9 @@
 # Tasks
 
+## v009
+- [x] Top 4 teams of each division qualyfies for the playoffs
+- [x] Subtitles for p/z/y/x (Presidents' Trophy, Clinched Conference/Division and Playoff spot) 
+
 ## v008
 - [x] Team Data button on the season calendar screen, inside the screen: 
     - [x] Games tab - table showing all regular season games for the user's team, sorted by date, columns: (Date, @/vs, Opponent, Goals For, Goals Against, Result (win or loss), W-L-T, Streak (accumulated X Losses or X Wins), Pct (points percentage = Points earned / Points possible)) 

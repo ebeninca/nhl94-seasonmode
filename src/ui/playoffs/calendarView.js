@@ -44,7 +44,7 @@ export function renderPlayoffCalendarView() {
         html += `<p style="text-align:center; color:#ccc;">No games scheduled today.</p>`;
     }
 
-    const roundNames = ['FR', 'CSF', 'CF', 'SCF'];
+    const roundNames = ['DR1', 'DSF', 'CF', 'SCF'];
 
     shownEntries.forEach((entry, idx) => {
         const s = entry.series;

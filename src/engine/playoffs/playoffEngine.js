@@ -7,34 +7,37 @@ import { updatePlayoffPlayerStats, updatePlayoffGoalieStats } from './playoffSta
 import { generatePlayoffCalendar, rebuildCalendarForNewRound } from './playoffCalendar.js';
 
 export function getPlayoffSeeds() {
-    const conferences = ['Eastern', 'Western'];
+    // 1993-94 format: top 4 from each division qualify
+    const divisions = ['Northeast', 'Atlantic', 'Central', 'Pacific'];
     const seeds = {};
-    conferences.forEach(conf => {
-        const confTeams = Object.keys(teams).filter(t => teams[t].conference === conf);
-        confTeams.sort((a, b) => {
+    divisions.forEach(div => {
+        const divTeams = Object.keys(teams).filter(t => teams[t].division === div);
+        divTeams.sort((a, b) => {
             const as = state.teamStats[a], bs = state.teamStats[b];
             if (bs.points !== as.points) return bs.points - as.points;
             if (bs.wins !== as.wins) return bs.wins - as.wins;
             return (bs.goalsFor - bs.goalsAgainst) - (as.goalsFor - as.goalsAgainst);
         });
-        seeds[conf] = confTeams.slice(0, 8);
+        seeds[div] = divTeams.slice(0, 4);
     });
     return seeds;
 }
 
 export function buildFirstRound(seeds) {
+    // Intra-division matchups: 1v4, 2v3
     const matchups = [];
-    ['Eastern', 'Western'].forEach(conf => {
-        const s = seeds[conf];
-        [[0,7],[1,6],[2,5],[3,4]].forEach(([hi, lo]) => {
-            matchups.push({ conf, high: s[hi], low: s[lo], highSeed: hi+1, lowSeed: lo+1 });
-        });
+    const divisions = ['Northeast', 'Atlantic', 'Central', 'Pacific'];
+    divisions.forEach(div => {
+        const s = seeds[div];
+        const conf = teams[s[0]].conference;
+        matchups.push({ conf, div, high: s[0], low: s[3], highSeed: 1, lowSeed: 4 });
+        matchups.push({ conf, div, high: s[1], low: s[2], highSeed: 2, lowSeed: 3 });
     });
     return matchups;
 }
 
-export function createSeries(team1, team2, conf) {
-    return { team1, team2, conf, wins1: 0, wins2: 0, games: [], winner: null };
+export function createSeries(team1, team2, conf, div) {
+    return { team1, team2, conf, div: div || null, wins1: 0, wins2: 0, games: [], winner: null };
 }
 
 export function initPlayoffs() {
@@ -50,7 +53,7 @@ export function initPlayoffs() {
         }
     });
 
-    const round1Series = firstRoundMatchups.map(m => createSeries(m.high, m.low, m.conf));
+    const round1Series = firstRoundMatchups.map(m => createSeries(m.high, m.low, m.conf, m.div));
 
     state.playoffState = {
         seeds,
@@ -104,26 +107,36 @@ export function checkAndAdvancePlayoffRound() {
     const currentRound = state.playoffState.rounds[state.playoffState.rounds.length - 1];
     if (!currentRound.every(s => s.winner)) return false;
 
-    const winners = currentRound.map(s => s.winner);
     const roundIdx = state.playoffState.rounds.length - 1;
 
     if (roundIdx === 3) {
-        state.playoffState.champion = winners[0];
+        state.playoffState.champion = currentRound[0].winner;
         return false;
     }
 
     let nextSeries = [];
-    if (roundIdx < 2) {
-        const eastWinners = winners.filter((_, i) => currentRound[i].conf === 'Eastern');
-        const westWinners = winners.filter((_, i) => currentRound[i].conf === 'Western');
-        for (let i = 0; i < eastWinners.length; i += 2)
-            nextSeries.push(createSeries(eastWinners[i], eastWinners[i+1], 'Eastern'));
-        for (let i = 0; i < westWinners.length; i += 2)
-            nextSeries.push(createSeries(westWinners[i], westWinners[i+1], 'Western'));
-    } else {
-        const eastChamp = winners.find((_, i) => currentRound[i].conf === 'Eastern');
-        const westChamp = winners.find((_, i) => currentRound[i].conf === 'Western');
-        nextSeries.push(createSeries(eastChamp, westChamp, 'Final'));
+
+    if (roundIdx === 0) {
+        // Round 1 -> Round 2 (Division Semifinals): winners from same division face each other
+        const divisions = ['Northeast', 'Atlantic', 'Central', 'Pacific'];
+        divisions.forEach(div => {
+            const divSeries = currentRound.filter(s => s.div === div);
+            if (divSeries.length === 2) {
+                const conf = divSeries[0].conf;
+                nextSeries.push(createSeries(divSeries[0].winner, divSeries[1].winner, conf, div));
+            }
+        });
+    } else if (roundIdx === 1) {
+        // Round 2 -> Round 3 (Conference Finals): division champions from same conference
+        const eastDivs = currentRound.filter(s => s.conf === 'Eastern');
+        const westDivs = currentRound.filter(s => s.conf === 'Western');
+        if (eastDivs.length === 2) nextSeries.push(createSeries(eastDivs[0].winner, eastDivs[1].winner, 'Eastern'));
+        if (westDivs.length === 2) nextSeries.push(createSeries(westDivs[0].winner, westDivs[1].winner, 'Western'));
+    } else if (roundIdx === 2) {
+        // Round 3 -> Round 4 (Stanley Cup Final): conference champions
+        const eastChamp = currentRound.find(s => s.conf === 'Eastern')?.winner;
+        const westChamp = currentRound.find(s => s.conf === 'Western')?.winner;
+        if (eastChamp && westChamp) nextSeries.push(createSeries(eastChamp, westChamp, 'Final'));
     }
 
     nextSeries.forEach(s => {

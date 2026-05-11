@@ -9,17 +9,33 @@ export function renderPlayoffBracket() {
     const allRounds = [[], [], [], []];
     state.playoffState.rounds.forEach((round, ri) => { allRounds[ri] = round; });
 
-    const roundNames = ['', 'Conf. Semifinals', 'Conf. Finals'];
+    // Western divisions: Central, Pacific | Eastern divisions: Northeast, Atlantic
+    const westDivs = ['Central', 'Pacific'];
+    const eastDivs = ['Northeast', 'Atlantic'];
 
-    function colHtml(conf, ri) {
+    function divColHtml(conf, divs) {
+        // Round 1: 2 series per division, 4 total per conference
+        const round = allRounds[0];
+        const confSeries = round ? round.filter(s => s.conf === conf) : [];
+        const label = `${conf} Conference`;
+        let html = `<div class="bracket-col"><div class="bracket-col-label">${label}</div>`;
+        // Show series grouped: first div's 2 series, then second div's 2 series
+        divs.forEach(div => {
+            const divSeries = confSeries.filter(s => s.div === div);
+            for (let i = 0; i < 2; i++) {
+                html += divSeries[i] ? renderSeriesCard(divSeries[i]) : renderTBDCard();
+            }
+        });
+        html += `</div>`;
+        return html;
+    }
+
+    function roundColHtml(conf, ri, label, slots) {
         const round = allRounds[ri];
         const confSeries = round ? round.filter(s => s.conf === conf) : [];
-        const slots = [4, 2, 1][ri];
-        const label = ri === 0 ? `${conf} Conference` : roundNames[ri];
         let html = `<div class="bracket-col"><div class="bracket-col-label">${label}</div>`;
         for (let si = 0; si < slots; si++) {
-            const s = confSeries[si] || null;
-            html += s ? renderSeriesCard(s) : renderTBDCard();
+            html += confSeries[si] ? renderSeriesCard(confSeries[si]) : renderTBDCard();
         }
         html += `</div>`;
         return html;
@@ -32,20 +48,24 @@ export function renderPlayoffBracket() {
     }
 
     html += `<div class="bracket-container">`;
-    html += colHtml('Western', 0);
-    html += colHtml('Western', 1);
-    html += colHtml('Western', 2);
 
+    // Western side (left to center)
+    html += divColHtml('Western', westDivs);
+    html += roundColHtml('Western', 1, 'Div. Semifinals', 2);
+    html += roundColHtml('Western', 2, 'Conf. Finals', 1);
+
+    // Center: Stanley Cup Final
     const finalSeries = allRounds[3] && allRounds[3][0];
     html += `<div class="bracket-col bracket-col-final"><div class="bracket-col-label" style="color:#FFD700;">🏆 Stanley Cup Final</div>`;
     html += finalSeries ? renderSeriesCard(finalSeries) : renderTBDCard();
     html += `</div>`;
 
-    html += colHtml('Eastern', 2);
-    html += colHtml('Eastern', 1);
-    html += colHtml('Eastern', 0);
-    html += `</div>`;
+    // Eastern side (center to right)
+    html += roundColHtml('Eastern', 2, 'Conf. Finals', 1);
+    html += roundColHtml('Eastern', 1, 'Div. Semifinals', 2);
+    html += divColHtml('Eastern', eastDivs);
 
+    html += `</div>`;
     container.innerHTML = html;
 }
 

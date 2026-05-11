@@ -49,7 +49,7 @@ function renderPlayoffTeamGames(container) {
     }
 
     const team = state.selectedTeam;
-    const roundNames = ['First Round', 'Conf. Semifinals', 'Conf. Finals', 'Stanley Cup Final'];
+    const roundNames = ['Division QF', 'Division SF', 'Conference Finals', 'Stanley Cup Final'];
     const homeGames = [0, 1, 4, 6];
     const calendar = state.playoffState.calendar;
 
