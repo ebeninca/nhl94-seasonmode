@@ -58,7 +58,7 @@
     <button class="btn" onclick="nextDate()" id="nextDateBtn">Next Date →</button>
     <button class="btn" onclick="showStandings()">Standings</button>
     <button class="btn" onclick="showLeagueLeaders()">League Leaders</button>
-    <button class="btn" onclick="showTeamData()">Team Data</button>
+    <button class="btn" id="teamDataBtn" onclick="showTeamData()">Team Data</button>
     <button class="btn" onclick="event.stopPropagation(); saveGame();">Save Game</button>
     <button class="btn" onclick="event.stopPropagation(); exportSave();">Export Save</button>
     <button class="btn" style="background: linear-gradient(135deg, #e53935, #b71c1c);" onclick="confirmEndSeason()">End Season Now</button>
@@ -117,7 +117,7 @@
     <!-- Team Data Screen -->
     <div id="teamDataScreen" class="screen">
         <div class="container">
-            <button class="back-button" onclick="backToGame()">← Back to Game</button>
+            <button class="back-button" onclick="backToSeasonCalendar()">← Back to Calendar</button>
             <div class="header">
                 <h1>Team Data</h1>
             </div>

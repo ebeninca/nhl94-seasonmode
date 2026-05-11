@@ -4,6 +4,7 @@
 - [x] Top 4 teams of each division qualyfies for the playoffs
 - [x] Subtitles for p/z/y/x (Presidents' Trophy, Clinched Conference/Division and Playoff spot) 
 - [x] New columns on standings (pct, home and away W-L-T)
+- [x] Show Team Data at the end of the season
 
 ## v008
 - [x] Team Data button on the season calendar screen, inside the screen: 

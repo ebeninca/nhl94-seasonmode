@@ -60,6 +60,12 @@ function viewSeasonCalendar() {
     updateNavigationButtons();
 }
 
+function backToSeasonCalendar() {
+    hideAllScreens();
+    document.getElementById('gameScreen').classList.add('active');
+    updateNavigationButtons();
+}
+
 
 
 // Expose state fields needed by inline onclick in leagueLeaders table headers
@@ -127,7 +133,7 @@ Object.assign(window, {
     initPlayoffs: initPlayoffsAndShow, continuePlayoffs, showPlayoffScreen, renderPlayoffView, switchPlayoffView, confirmEndSeason, seasonOverAndShow,
     playoffNextDate, playoffPrevDate, submitPlayoffCalendarGame, simulatePlayoffCalendarGame,
     showPlayoffLeaders, sortPlayoffLeaders, renderPlayoffLeaders, switchPlayoffLeaderView,
-    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar,
+    showPlayoffGameRawStats, saveAndExportFinal, viewSeasonCalendar, backToSeasonCalendar,
     showTeamData, switchTeamDataTab, switchTeamDataStatsView, sortTeamData,
     showPlayoffTeamData, switchPlayoffTeamDataTab, switchPlayoffTDStatsView, sortPlayoffTD
 });
